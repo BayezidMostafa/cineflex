@@ -4,13 +4,11 @@ import { Movie } from "@/lib/interfaces";
 import useMovieStore from "@/store/movieStore";
 import { useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import useDebounce from "@/lib/hooks/useDebounce";
 import Card from "@/components/Movie/Card/Card";
 import Skeleton from "@/components/Movie/Card/Skeleton";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
 
 interface SearchFormData {
   search: string;
@@ -55,13 +53,16 @@ const Home = () => {
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const [suggestions, setSuggestions] = useState<Movie[]>([]);
+  const loaderRef = useRef<HTMLDivElement>(null);
 
+  // Fetch and add movies to the store
   useEffect(() => {
     if (data?.results) {
       addMovies(data.results);
     }
   }, [data, addMovies]);
 
+  // Handle movie search
   useEffect(() => {
     if (debouncedSearchQuery && debouncedSearchQuery.length >= 3) {
       searchMovies(debouncedSearchQuery).then((response) => {
@@ -72,16 +73,33 @@ const Home = () => {
     }
   }, [debouncedSearchQuery]);
 
+  // Infinite Scroll Observer
+  const handleObserver = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const target = entries[0];
+      if (target.isIntersecting && !isFetching) {
+        setPage((prev) => prev + 1);
+      }
+    },
+    [isFetching]
+  );
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(handleObserver, {
+      root: null,
+      rootMargin: "20px",
+      threshold: 1.0,
+    });
+    if (loaderRef.current) observer.observe(loaderRef.current);
+    return () => observer.disconnect();
+  }, [handleObserver]);
+
   const onSubmit = (data: SearchFormData) => {
     router.push(`/search?query=${encodeURIComponent(data.search)}`);
   };
 
   const handleSuggestionClick = (title: string) => {
     router.push(`/search?query=${encodeURIComponent(title)}`);
-  };
-
-  const handleLoadMore = () => {
-    setPage((prev) => prev + 1);
   };
 
   return (
@@ -132,16 +150,10 @@ const Home = () => {
         {isLoading &&
           Array.from({ length: 10 }).map((_, i) => <Skeleton key={i} />)}
       </div>
-      <div className="flex justify-center mt-5">
-        <Button size={"lg"} onClick={handleLoadMore} disabled={isFetching}>
-          {isFetching ? (
-            <span className="animate-spin">
-              <Loader2 />
-            </span>
-          ) : (
-            "Load More"
-          )}
-        </Button>
+
+      {/* Loader div for Intersection Observer */}
+      <div ref={loaderRef} className="flex justify-center mt-5">
+        {isFetching && <Skeleton />}
       </div>
     </div>
   );
