@@ -3,7 +3,8 @@ import { create } from "zustand";
 
 const useMovieStore = create<MovieState>((set) => ({
   movies: [],
-  addMovies: (movies: Movie[]) => set({ movies }),
+  addMovies: (newMovies: Movie[]) =>
+    set((state) => ({ movies: [...state.movies, ...newMovies] })),
 }));
 
 export default useMovieStore;
