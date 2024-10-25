@@ -1,17 +1,43 @@
+import { Button } from "@/components/ui/button";
 import { Movie } from "@/lib/interfaces";
+import { Clapperboard, Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
+import {
+  addMovieToWatchlist,
+  removeMovieFromWatchlist,
+  getWatchlist,
+} from "@/app/actions/watchlistActions";
 
 interface CardProps {
   data: Movie;
 }
 
 const Card: React.FC<CardProps> = ({ data }) => {
+  const [isInWatchlist, setIsInWatchlist] = useState<boolean>(false);
+
+  // Check if the movie is already in the watchlist when the component mounts
+  React.useEffect(() => {
+    getWatchlist().then((watchlist) => {
+      setIsInWatchlist(watchlist.some((movie) => movie.id === data.id));
+    });
+  }, [data.id]);
+
+  const handleWatchlistToggle = async () => {
+    if (isInWatchlist) {
+      await removeMovieFromWatchlist(data.id);
+    } else {
+      await addMovieToWatchlist(data);
+    }
+    // Update the state to reflect the new status
+    setIsInWatchlist((prev) => !prev);
+  };
+
   return (
     <div>
-      <Link href={`/movie/${data?.id}`}>
-        <div className="relative">
+      <div className="relative">
+        <Link href={`/movie/${data?.id}`}>
           <Image
             src={`${process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL}${data?.poster_path}`}
             height={400}
@@ -22,20 +48,33 @@ const Card: React.FC<CardProps> = ({ data }) => {
             placeholder="blur"
             blurDataURL="/placeholder.png"
           />
-          <div className="absolute bottom-3 right-3 bg-white backdrop-blur px-2 py-1 rounded-md">
-            <p
-              className={`font-semibold ${
-                data?.vote_average > 7
-                  ? "text-green-500"
-                  : data?.vote_average >= 5
-                  ? "text-yellow-500"
-                  : "text-red-500"
-              }`}
-            >
-              {data?.vote_average}
-            </p>
-          </div>
+        </Link>
+        <div className="absolute bottom-3 right-3 bg-white backdrop-blur px-2 py-1 rounded-md">
+          <p
+            className={`font-semibold ${
+              data?.vote_average > 7
+                ? "text-green-500"
+                : data?.vote_average >= 5
+                ? "text-yellow-500"
+                : "text-red-500"
+            }`}
+          >
+            {data?.vote_average}
+          </p>
         </div>
+        <div className="absolute top-2 right-3 flex gap-2">
+          <Button size="icon" onClick={handleWatchlistToggle}>
+            <Heart />
+          </Button>
+          <Button size="icon" onClick={handleWatchlistToggle}>
+            <Clapperboard
+              fill={isInWatchlist ? "red" : "none"}
+              stroke={isInWatchlist ? "red" : "black"}
+            />
+          </Button>
+        </div>
+      </div>
+      <Link href={`/movie/${data?.id}`}>
         <p className="max-w-52 font-semibold mt-2">
           {data?.title || "No title found"}
         </p>
