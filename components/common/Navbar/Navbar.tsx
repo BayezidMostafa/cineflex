@@ -3,16 +3,18 @@ import { NavData } from "@/lib/data";
 import Link from "next/link";
 import React, { useState } from "react";
 import { X, Menu } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 const Navbar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const pathname = usePathname();
 
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev);
   };
 
   return (
-    <nav className="flex items-center justify-between fixed left-0 right-0 max-w-7xl mx-auto p-5 bg-background rounded-b-lg shadow z-50">
+    <nav className="flex items-center justify-between fixed left-0 right-0 max-w-7xl mx-auto p-5 bg-background rounded-b-lg shadow border-2 border-primary-foreground z-50">
       <Link href="/">
         <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold">
           Cineflex
@@ -21,7 +23,15 @@ const Navbar = () => {
       <div className="hidden md:flex gap-6 md:gap-8 lg:gap-10 font-medium">
         {NavData.map((n, i) => (
           <Link href={n?.href} key={i}>
-            {n?.label}
+            <span
+              className={`${
+                pathname === n?.href
+                  ? "text-primary font-semibold border-b-2 border-primary" // Active style
+                  : "text-primary/80"
+              }`}
+            >
+              {n?.label}
+            </span>
           </Link>
         ))}
       </div>
@@ -48,10 +58,18 @@ const Navbar = () => {
             <X className="w-6 h-6" />
           </button>
         </div>
-        <nav className="flex flex-col items-center gap-4 font-medium ">
+        <nav className="flex flex-col items-center gap-4 font-medium">
           {NavData.map((n, i) => (
             <Link href={n?.href} key={i} onClick={toggleSidebar}>
-              {n?.label}
+              <span
+                className={`${
+                  pathname === n?.href
+                    ? "text-primary font-semibold border-b-2 border-primary" // Active style
+                    : "text-primary/80"
+                }`}
+              >
+                {n?.label}
+              </span>
             </Link>
           ))}
         </nav>
