@@ -35,7 +35,7 @@ const searchMovies = async (query: string): Promise<{ results: Movie[] }> => {
 };
 
 const Home = () => {
-  const initialPage = useRef(1); 
+  const initialPage = useRef(1);
   const [page, setPage] = useState(initialPage.current);
   const { movies, addMovies, resetMovies } = useMovieStore();
   const { data, error, isLoading, isFetching } = useQuery({
@@ -156,11 +156,12 @@ const Home = () => {
           <Card key={i} data={m} />
         ))}
         {isLoading &&
-          Array.from({ length: 10 }).map((_, i) => <Skeleton key={i} />)}
+          Array.from({ length: 20 }).map((_, i) => <Skeleton key={i} />)}
       </div>
 
       <div ref={loaderRef} className="flex justify-center mt-5">
-        {isFetching && <Skeleton />}
+        {isFetching &&
+          Array.from({ length: 20 }).map((_, i) => <Skeleton key={i} />)}
       </div>
     </div>
   );

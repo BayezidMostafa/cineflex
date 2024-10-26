@@ -27,9 +27,10 @@ const RecommendedMoviesSlider: React.FC<RecommendedMoviesSliderProps> = ({
         768: { slidesPerView: 4 },
         1024: { slidesPerView: 5 },
       }}
+      className=""
     >
       {recommendations.map((recMovie) => (
-        <SwiperSlide key={recMovie.id}>
+        <SwiperSlide key={recMovie.id} className="pb-8">
           <Card data={recMovie} />
         </SwiperSlide>
       ))}

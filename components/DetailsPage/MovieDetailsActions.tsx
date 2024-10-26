@@ -53,10 +53,10 @@ const MovieDetailsActions: React.FC<MovieDetailsActionsProps> = ({ movie }) => {
       <Button
         size="icon"
         onClick={handleFavoriteMovieToggle}
-        className="bg-white"
+        className="bg-white hover:bg-white/80"
       >
         {loadingStatus || loadingFavorite ? (
-          <Loader className="animate-spin" />
+          <Loader className="animate-spin text-black" />
         ) : (
           <Heart
             fill={isFavoriteMovie ? "red" : "none"}
@@ -67,10 +67,10 @@ const MovieDetailsActions: React.FC<MovieDetailsActionsProps> = ({ movie }) => {
       <Button
         size="icon"
         onClick={handleWatchListToggle}
-        className="bg-white"
+        className="bg-white hover:bg-white/80"
       >
         {loadingStatus || loadingWatchList ? (
-          <Loader className="animate-spin" />
+          <Loader className="animate-spin text-black" />
         ) : (
           <Clapperboard
             fill={isInWatchList ? "red" : "none"}

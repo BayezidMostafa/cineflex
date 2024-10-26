@@ -96,10 +96,10 @@ const Card: React.FC<CardProps> = ({
                 ? onToggleFavorite(data)
                 : handleFavoriteMovieToggle()
             }
-            className="bg-white"
+            className="bg-white hover:bg-white/80"
           >
             {loadingStatus || loadingFavorite ? (
-              <Loader className="animate-spin" />
+              <Loader className="animate-spin text-black" />
             ) : (
               <Heart
                 fill={isFavoriteMovie ? "red" : "none"}
@@ -114,10 +114,10 @@ const Card: React.FC<CardProps> = ({
                 ? onToggleWatchList(data)
                 : handleWatchListToggle()
             }
-            className="bg-white"
+            className="bg-white hover:bg-white/80"
           >
             {loadingStatus || loadingWatchList ? (
-              <Loader className="animate-spin" />
+              <Loader className="animate-spin text-black" />
             ) : (
               <Clapperboard
                 fill={isInWatchList ? "red" : "none"}

@@ -127,7 +127,7 @@ const MovieDetailsPage = async ({ params }: MovieDetailsProps) => {
       </div>
 
       {/* Recommendations Section */}
-      <div className="mt-10">
+      <div className="mt-10 recommended-slider">
         <h2 className="text-2xl font-semibold mb-4">Recommended Movies</h2>
         <RecommendedMoviesSlider recommendations={recommendations} />
       </div>
