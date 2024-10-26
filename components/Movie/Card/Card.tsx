@@ -41,14 +41,22 @@ const Card: React.FC<CardProps> = ({
 
   const handleWatchListToggle = async () => {
     setIsInWatchList((prev) => !prev);
-    const result = await toggleWatchList(data);
-    setIsInWatchList(result.isInWatchList);
+    if (onToggleWatchList) {
+      onToggleWatchList(data);
+    } else {
+      const result = await toggleWatchList(data);
+      setIsInWatchList(result.isInWatchList);
+    }
   };
 
   const handleFavoriteMovieToggle = async () => {
-    setIsFavoriteMovie((prev) => !prev);
-    const result = await toggleFavoriteMovie(data);
-    setIsFavoriteMovie(result.isFavoriteMovie); 
+    setIsFavoriteMovie((prev) => !prev); 
+    if (onToggleFavorite) {
+      onToggleFavorite(data);
+    } else {
+      const result = await toggleFavoriteMovie(data);
+      setIsFavoriteMovie(result.isFavoriteMovie);
+    }
   };
 
   return (
@@ -82,11 +90,7 @@ const Card: React.FC<CardProps> = ({
         <div className="absolute top-2 right-3 flex gap-2">
           <Button
             size="icon"
-            onClick={() =>
-              onToggleFavorite
-                ? onToggleFavorite(data)
-                : handleFavoriteMovieToggle()
-            }
+            onClick={handleFavoriteMovieToggle}
             className="bg-white"
           >
             <Heart
@@ -96,11 +100,7 @@ const Card: React.FC<CardProps> = ({
           </Button>
           <Button
             size="icon"
-            onClick={() =>
-              onToggleWatchList
-                ? onToggleWatchList(data)
-                : handleWatchListToggle()
-            }
+            onClick={handleWatchListToggle}
             className="bg-white"
           >
             <Clapperboard
