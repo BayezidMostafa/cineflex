@@ -4,6 +4,7 @@ import { Clapperboard, Heart, Loader } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
+import placeholderImage from "@/public/placeholder.png";
 import {
   toggleWatchList,
   toggleFavoriteMovie,
@@ -72,7 +73,7 @@ const Card: React.FC<CardProps> = ({
             alt={data?.title || "movie-poster"}
             loading="lazy"
             placeholder="blur"
-            blurDataURL="/placeholder.png"
+            blurDataURL={placeholderImage.src}
           />
         </Link>
         <div className="absolute bottom-3 right-3 bg-white backdrop-blur px-2 py-1 rounded-md">

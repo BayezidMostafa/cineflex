@@ -20,22 +20,8 @@ export interface Movie {
   vote_count: number;
 }
 
-export interface MovieDetails {
-  id: number;
-  title: string;
-  release_date: string;
-  poster_path: string;
-  overview: string;
-  vote_average: number;
+export interface MovieDetails extends Movie {
   genres: IGenre[];
-  genre_ids: number[];
-  popularity: number;
-  adult: boolean;
-  backdrop_path: string;
-  original_language: string;
-  original_title: string;
-  video: boolean;
-  vote_count: number;
 }
 
 export interface CastMember {
