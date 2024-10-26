@@ -64,7 +64,7 @@ const Search = () => {
   }, [handleObserver]);
 
   return (
-    <div className="mt-5 mb-8">
+    <div className="mt-5 mb-8 min-h-screen">
       <h1 className="text-xl sm:text-2xl font-bold">Search Results</h1>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5 md:gap-6 lg:gap-8 mt-5">

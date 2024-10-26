@@ -112,9 +112,9 @@ const Home = () => {
 
   return (
     <div className="mt-5 mb-8">
-      <div className="flex justify-between items-center relative">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 relative">
         <h1 className="text-xl sm:text-2xl font-bold">Popular Movies</h1>
-        <div className="relative max-w-sm w-full">
+        <div className="relative sm:max-w-sm w-full">
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="flex flex-col gap-2"
@@ -140,7 +140,7 @@ const Home = () => {
               {suggestions.map((movie) => (
                 <div
                   key={movie.id}
-                  className="p-2 cursor-pointer hover:bg-gray-200"
+                  className="p-2 cursor-pointer hover:bg-secondary"
                   onClick={() => handleSuggestionClick(movie.title)}
                 >
                   {movie.title}

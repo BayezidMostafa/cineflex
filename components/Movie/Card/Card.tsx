@@ -63,12 +63,12 @@ const Card: React.FC<CardProps> = ({
   return (
     <div>
       <div className="relative">
-        <Link href={`/movie/${data.id}`}>
+        <Link href={`/movie/${data.id}`} className="">
           <Image
             src={`${process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL}${data.poster_path}`}
-            height={400}
+            height={350}
             width={250}
-            className="w-full"
+            className="w-full min-h-[340px] object-cover"
             alt={data.title || "movie-poster"}
             loading="lazy"
             placeholder="blur"
