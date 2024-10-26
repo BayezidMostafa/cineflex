@@ -22,9 +22,14 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+
   return (
-    <html lang="en" className={montserrat.variable}> {/* Add the font class */}
-      <body className={`antialiased font-sans ${montserrat.className}`}> {/* Apply Montserrat */}
+    <html lang="en" className={montserrat.variable}>
+      {" "}
+      {/* Add the font class */}
+      <body className={`antialiased font-sans ${montserrat.className}`}>
+        {" "}
+        {/* Apply Montserrat */}
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

@@ -1,31 +1,23 @@
-// app/actions/watchlistActions.ts
 "use server";
 
 import { Movie } from "@/lib/interfaces";
 
-// Mock in-memory watchlist data for demonstration
-const mockWatchlist: Movie[] = [];
+let watchList: Movie[] = [];
 
-// Add movie to watchlist
-export async function addMovieToWatchlist(movie: Movie) {
-    console.log(movie)
-  // Check if the movie is already in the watchlist to avoid duplicates
-  if (!mockWatchlist.some((m) => m.id === movie.id)) {
-    mockWatchlist.push(movie);
-  }
-  return mockWatchlist;
+export async function getWatchList(): Promise<Movie[]> {
+  return watchList;
 }
 
-// Remove movie from watchlist
-export async function removeMovieFromWatchlist(movieId: number) {
-  const index = mockWatchlist.findIndex((m) => m.id === movieId);
-  if (index !== -1) {
-    mockWatchlist.splice(index, 1);
+export async function addMovieToWatchList(movie: Movie): Promise<Movie[]> {
+  if (!watchList.some((m) => m.id === movie.id)) {
+    watchList.push(movie);
   }
-  return mockWatchlist;
+  return watchList;
 }
 
-// Fetch current watchlist
-export async function getWatchlist() {
-  return mockWatchlist;
+export async function removeMovieFromWatchList(
+  movieId: number
+): Promise<Movie[]> {
+  watchList = watchList.filter((m) => m.id !== movieId);
+  return watchList;
 }
