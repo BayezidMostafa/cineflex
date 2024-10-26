@@ -57,14 +57,14 @@ const MovieDetailsPage = async ({ params }: MovieDetailsProps) => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-4">{movie.title}</h1>
+      <h1 className="text-3xl font-bold mb-4">{movie?.title}</h1>
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="w-full relative">
           <Image
-            src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+            src={`https://image.tmdb.org/t/p/w500${movie?.poster_path}`}
             width={500}
             height={750}
-            alt={movie.title || "Movie Poster"}
+            alt={movie?.title || "Movie Poster"}
             className="rounded-lg object-contain w-full"
           />
           <span className="absolute top-0 right-5">
@@ -73,15 +73,15 @@ const MovieDetailsPage = async ({ params }: MovieDetailsProps) => {
         </div>
         <div className="w-full">
           <h2 className="text-2xl font-semibold">Overview</h2>
-          <p className="mt-2">{movie.overview}</p>
+          <p className="mt-2">{movie?.overview}</p>
           <h3 className="text-xl font-semibold mt-3">Genres</h3>
           <p className="">
-            {movie.genres.map((genre) => genre.name).join(", ")}
+            {movie?.genres.map((genre) => genre.name).join(", ")}
           </p>
           <p className="mt-4">
             <span className="font-semibold">Release Date:</span>{" "}
-            {movie.release_date
-              ? new Date(movie.release_date).toLocaleDateString("en-US", {
+            {movie?.release_date
+              ? new Date(movie?.release_date).toLocaleDateString("en-US", {
                   month: "long",
                   day: "numeric",
                   year: "numeric",
@@ -92,34 +92,34 @@ const MovieDetailsPage = async ({ params }: MovieDetailsProps) => {
             <span className="font-semibold">Rating:</span>{" "}
             <span
               className={`font-semibold ${
-                movie.vote_average > 7
+                movie?.vote_average > 7
                   ? "text-green-500"
-                  : movie.vote_average >= 5
+                  : movie?.vote_average >= 5
                   ? "text-yellow-500"
                   : "text-red-500"
               }`}
             >
-              {movie.vote_average.toFixed(1)}
+              {movie?.vote_average.toFixed(1)}
             </span>
           </p>
 
           <h3 className="text-xl font-semibold mt-4">Cast</h3>
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 gap-4 mt-2">
-            {cast.slice(0, 12).map((member) => (
-              <div key={member.cast_id} className="text-center">
+            {cast?.slice(0, 12).map((member) => (
+              <div key={member?.cast_id} className="text-center">
                 <Image
                   src={
-                    member.profile_path
-                      ? `https://image.tmdb.org/t/p/w200${member.profile_path}`
+                    member?.profile_path
+                      ? `https://image.tmdb.org/t/p/w200${member?.profile_path}`
                       : "/placeholder.png"
                   }
-                  alt={member.name}
+                  alt={member?.name}
                   width={100}
                   height={150}
                   className="rounded-lg mx-auto w-full"
                 />
-                <p className="mt-2 font-medium">{member.name}</p>
-                <p className="text-sm text-gray-500">{member.character}</p>
+                <p className="mt-2 font-medium">{member?.name}</p>
+                <p className="text-sm text-gray-500">{member?.character}</p>
               </div>
             ))}
           </div>

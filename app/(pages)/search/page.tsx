@@ -26,7 +26,7 @@ const Search = () => {
   const [page, setPage] = useState(1);
   const [movies, setMovies] = useState<Movie[]>([]);
 
-  const debouncedQuery = useDebounce(initialQuery, 500); 
+  const debouncedQuery = useDebounce(initialQuery, 500);
   const loaderRef = useRef<HTMLDivElement | null>(null);
 
   const { data, isFetching, isLoading, error } = useQuery({
@@ -37,16 +37,20 @@ const Search = () => {
 
   useEffect(() => {
     if (data?.results && page === 1) {
-      setMovies(data.results); 
+      setMovies(data.results);
     } else if (data?.results && page > 1) {
-      setMovies((prev) => [...prev, ...data.results]); 
+      setMovies((prev) => [...prev, ...data.results]);
     }
   }, [data, page]);
 
   const handleObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
       const target = entries[0];
-      if (target.isIntersecting && !isFetching && data?.page < data?.total_pages) {
+      if (
+        target.isIntersecting &&
+        !isFetching &&
+        data?.page < data?.total_pages
+      ) {
         setPage((prev) => prev + 1);
       }
     },
@@ -60,7 +64,7 @@ const Search = () => {
       threshold: 1.0,
     });
     if (loaderRef.current) observer.observe(loaderRef.current);
-    return () => observer.disconnect(); 
+    return () => observer.disconnect();
   }, [handleObserver]);
 
   return (

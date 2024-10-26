@@ -31,7 +31,7 @@ const Card: React.FC<CardProps> = ({
     let isMounted = true;
     async function fetchStatus() {
       setLoadingStatus(true);
-      const status = await getMovieStatus(data.id);
+      const status = await getMovieStatus(data?.id);
       if (isMounted) {
         setIsInWatchList(status.isInWatchList);
         setIsFavoriteMovie(status.isFavoriteMovie);
@@ -42,7 +42,7 @@ const Card: React.FC<CardProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [data.id]);
+  }, [data?.id]);
 
   const handleWatchListToggle = async () => {
     setLoadingWatchList(true);
@@ -63,13 +63,13 @@ const Card: React.FC<CardProps> = ({
   return (
     <div>
       <div className="relative">
-        <Link href={`/movie/${data.id}`} className="">
+        <Link href={`/movie/${data?.id}`} className="">
           <Image
-            src={`${process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL}${data.poster_path}`}
+            src={`${process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL}${data?.poster_path}`}
             height={350}
             width={250}
             className="w-full min-h-[340px] object-cover"
-            alt={data.title || "movie-poster"}
+            alt={data?.title || "movie-poster"}
             loading="lazy"
             placeholder="blur"
             blurDataURL="/placeholder.png"
@@ -78,14 +78,14 @@ const Card: React.FC<CardProps> = ({
         <div className="absolute bottom-3 right-3 bg-white backdrop-blur px-2 py-1 rounded-md">
           <p
             className={`font-semibold ${
-              data.vote_average > 7
+              data?.vote_average > 7
                 ? "text-green-500"
-                : data.vote_average >= 5
+                : data?.vote_average >= 5
                 ? "text-yellow-500"
                 : "text-red-500"
             }`}
           >
-            {data.vote_average.toFixed(1)}
+            {data?.vote_average.toFixed(1)}
           </p>
         </div>
         <div className="absolute top-2 right-3 flex gap-2">
@@ -127,14 +127,14 @@ const Card: React.FC<CardProps> = ({
           </Button>
         </div>
       </div>
-      <Link href={`/movie/${data.id}`}>
+      <Link href={`/movie/${data?.id}`}>
         <p className="max-w-52 font-semibold mt-2">
-          {data.title || "No title found"}
+          {data?.title || "No title found"}
         </p>
       </Link>
       <p className="text-sm text-primary/70">
-        {data.release_date
-          ? new Date(data.release_date).toLocaleDateString("en-US", {
+        {data?.release_date
+          ? new Date(data?.release_date).toLocaleDateString("en-US", {
               month: "long",
               day: "numeric",
               year: "numeric",
