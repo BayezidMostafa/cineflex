@@ -74,13 +74,19 @@ const MovieDetailsPage = async ({ params }: MovieDetailsProps) => {
         <div className="w-full">
           <h2 className="text-2xl font-semibold">Overview</h2>
           <p className="mt-2">{movie.overview}</p>
-          <h3 className="text-xl font-semibold mt-6">Genres</h3>
-          <p className="mt-2">
+          <h3 className="text-xl font-semibold mt-3">Genres</h3>
+          <p className="">
             {movie.genres.map((genre) => genre.name).join(", ")}
           </p>
           <p className="mt-4">
             <span className="font-semibold">Release Date:</span>{" "}
-            {movie.release_date}
+            {movie.release_date
+              ? new Date(movie.release_date).toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })
+              : "No date found"}
           </p>
           <p className="mt-2">
             <span className="font-semibold">Rating:</span>{" "}
@@ -97,8 +103,8 @@ const MovieDetailsPage = async ({ params }: MovieDetailsProps) => {
             </span>
           </p>
 
-          <h3 className="text-xl font-semibold mt-6">Cast</h3>
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 gap-4 mt-4">
+          <h3 className="text-xl font-semibold mt-4">Cast</h3>
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 gap-4 mt-2">
             {cast.slice(0, 12).map((member) => (
               <div key={member.cast_id} className="text-center">
                 <Image
