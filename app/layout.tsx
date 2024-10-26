@@ -8,11 +8,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Footer from "@/components/common/Footer/Footer";
 import { Montserrat } from "next/font/google";
 
-// Configure Montserrat font
 const montserrat = Montserrat({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"], // Choose weights based on your needs
-  variable: "--font-montserrat", // CSS variable to use in the project
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-montserrat",
 });
 
 const queryClient = new QueryClient();
@@ -22,14 +21,16 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-
   return (
     <html lang="en" className={montserrat.variable}>
-      {" "}
-      {/* Add the font class */}
+      <head>
+        <title>Cineflex</title>
+        <meta
+          name="description"
+          content="Cineflex: Your ultimate destination for cinematic insights and entertainment."
+        />
+      </head>
       <body className={`antialiased font-sans ${montserrat.className}`}>
-        {" "}
-        {/* Apply Montserrat */}
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
