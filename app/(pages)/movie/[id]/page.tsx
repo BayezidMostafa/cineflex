@@ -2,6 +2,7 @@ import React from "react";
 import Image from "next/image";
 import { CastMember, MovieDetails, Movie } from "@/lib/interfaces";
 import RecommendedMoviesSlider from "@/components/Sliders/RecommendedMovieSlider";
+import MovieDetailsActions from "@/components/DetailsPage/MovieDetailsActions";
 
 interface MovieDetailsProps {
   params: {
@@ -58,7 +59,7 @@ const MovieDetailsPage = async ({ params }: MovieDetailsProps) => {
     <div className="max-w-7xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-4">{movie.title}</h1>
       <div className="flex flex-col lg:flex-row gap-8">
-        <div className="w-full">
+        <div className="w-full relative">
           <Image
             src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
             width={500}
@@ -66,6 +67,9 @@ const MovieDetailsPage = async ({ params }: MovieDetailsProps) => {
             alt={movie.title || "Movie Poster"}
             className="rounded-lg object-contain w-full"
           />
+          <span className="absolute top-0 right-5">
+            <MovieDetailsActions movie={movie} />
+          </span>
         </div>
         <div className="w-full">
           <h2 className="text-2xl font-semibold">Overview</h2>
@@ -79,8 +83,20 @@ const MovieDetailsPage = async ({ params }: MovieDetailsProps) => {
             {movie.release_date}
           </p>
           <p className="mt-2">
-            <span className="font-semibold">Rating:</span> {movie.vote_average}
+            <span className="font-semibold">Rating:</span>{" "}
+            <span
+              className={`font-semibold ${
+                movie.vote_average > 7
+                  ? "text-green-500"
+                  : movie.vote_average >= 5
+                  ? "text-yellow-500"
+                  : "text-red-500"
+              }`}
+            >
+              {movie.vote_average.toFixed(1)}
+            </span>
           </p>
+
           <h3 className="text-xl font-semibold mt-6">Cast</h3>
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 gap-4 mt-4">
             {cast.slice(0, 12).map((member) => (

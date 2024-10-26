@@ -35,8 +35,9 @@ const searchMovies = async (query: string): Promise<{ results: Movie[] }> => {
 };
 
 const Home = () => {
-  const [page, setPage] = useState(1);
-  const { movies, addMovies } = useMovieStore();
+  const initialPage = useRef(1); 
+  const [page, setPage] = useState(initialPage.current);
+  const { movies, addMovies, resetMovies } = useMovieStore();
   const { data, error, isLoading, isFetching } = useQuery({
     queryKey: ["movies", page],
     queryFn: () => fetchMovies(page),
@@ -54,15 +55,18 @@ const Home = () => {
 
   const [suggestions, setSuggestions] = useState<Movie[]>([]);
   const loaderRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
-  // Fetch and add movies to the store
+  useEffect(() => {
+    resetMovies(); // Clear the movie store on page load
+  }, [resetMovies]);
+
   useEffect(() => {
     if (data?.results) {
       addMovies(data.results);
     }
   }, [data, addMovies]);
 
-  // Handle movie search
   useEffect(() => {
     if (debouncedSearchQuery && debouncedSearchQuery.length >= 3) {
       searchMovies(debouncedSearchQuery).then((response) => {
@@ -73,25 +77,29 @@ const Home = () => {
     }
   }, [debouncedSearchQuery]);
 
-  // Infinite Scroll Observer
   const handleObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
       const target = entries[0];
-      if (target.isIntersecting && !isFetching) {
+      if (
+        target.isIntersecting &&
+        !isFetching &&
+        page === initialPage.current
+      ) {
+        initialPage.current = page + 1;
         setPage((prev) => prev + 1);
       }
     },
-    [isFetching]
+    [isFetching, page]
   );
 
   useEffect(() => {
-    const observer = new IntersectionObserver(handleObserver, {
+    observerRef.current = new IntersectionObserver(handleObserver, {
       root: null,
       rootMargin: "20px",
       threshold: 1.0,
     });
-    if (loaderRef.current) observer.observe(loaderRef.current);
-    return () => observer.disconnect();
+    if (loaderRef.current) observerRef.current.observe(loaderRef.current);
+    return () => observerRef.current?.disconnect(); // Clean up observer
   }, [handleObserver]);
 
   const onSubmit = (data: SearchFormData) => {
@@ -151,7 +159,6 @@ const Home = () => {
           Array.from({ length: 10 }).map((_, i) => <Skeleton key={i} />)}
       </div>
 
-      {/* Loader div for Intersection Observer */}
       <div ref={loaderRef} className="flex justify-center mt-5">
         {isFetching && <Skeleton />}
       </div>

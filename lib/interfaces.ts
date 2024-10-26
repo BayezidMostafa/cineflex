@@ -27,7 +27,8 @@ export interface MovieDetails {
   poster_path: string;
   overview: string;
   vote_average: number;
-  genres: IGenre[]; // Required for detailed movie data
+  genres: IGenre[];
+  genre_ids: number[];
   popularity: number;
   adult: boolean;
   backdrop_path: string;
@@ -54,4 +55,5 @@ export interface IData {
 export interface MovieState {
   movies: Movie[];
   addMovies: (movies: Movie[]) => void;
+  resetMovies: () => void;
 }

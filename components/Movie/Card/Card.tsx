@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Movie } from "@/lib/interfaces";
-import { Clapperboard, Heart } from "lucide-react";
+import { Clapperboard, Heart, Loader } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
@@ -23,14 +23,19 @@ const Card: React.FC<CardProps> = ({
 }) => {
   const [isInWatchList, setIsInWatchList] = useState<boolean>(false);
   const [isFavoriteMovie, setIsFavoriteMovie] = useState<boolean>(false);
+  const [loadingWatchList, setLoadingWatchList] = useState<boolean>(false);
+  const [loadingFavorite, setLoadingFavorite] = useState<boolean>(false);
+  const [loadingStatus, setLoadingStatus] = useState<boolean>(true); // Initial loading state
 
   useEffect(() => {
     let isMounted = true;
     async function fetchStatus() {
+      setLoadingStatus(true);
       const status = await getMovieStatus(data.id);
       if (isMounted) {
         setIsInWatchList(status.isInWatchList);
         setIsFavoriteMovie(status.isFavoriteMovie);
+        setLoadingStatus(false); // Disable initial loading
       }
     }
     fetchStatus();
@@ -40,23 +45,19 @@ const Card: React.FC<CardProps> = ({
   }, [data.id]);
 
   const handleWatchListToggle = async () => {
+    setLoadingWatchList(true);
     setIsInWatchList((prev) => !prev);
-    if (onToggleWatchList) {
-      onToggleWatchList(data);
-    } else {
-      const result = await toggleWatchList(data);
-      setIsInWatchList(result.isInWatchList);
-    }
+    const result = await toggleWatchList(data);
+    setIsInWatchList(result.isInWatchList);
+    setLoadingWatchList(false);
   };
 
   const handleFavoriteMovieToggle = async () => {
-    setIsFavoriteMovie((prev) => !prev); 
-    if (onToggleFavorite) {
-      onToggleFavorite(data);
-    } else {
-      const result = await toggleFavoriteMovie(data);
-      setIsFavoriteMovie(result.isFavoriteMovie);
-    }
+    setLoadingFavorite(true);
+    setIsFavoriteMovie((prev) => !prev);
+    const result = await toggleFavoriteMovie(data);
+    setIsFavoriteMovie(result.isFavoriteMovie);
+    setLoadingFavorite(false);
   };
 
   return (
@@ -84,29 +85,45 @@ const Card: React.FC<CardProps> = ({
                 : "text-red-500"
             }`}
           >
-            {data.vote_average}
+            {data.vote_average.toFixed(1)}
           </p>
         </div>
         <div className="absolute top-2 right-3 flex gap-2">
           <Button
             size="icon"
-            onClick={handleFavoriteMovieToggle}
+            onClick={() =>
+              onToggleFavorite
+                ? onToggleFavorite(data)
+                : handleFavoriteMovieToggle()
+            }
             className="bg-white"
           >
-            <Heart
-              fill={isFavoriteMovie ? "red" : "none"}
-              stroke={isFavoriteMovie ? "red" : "black"}
-            />
+            {loadingStatus || loadingFavorite ? (
+              <Loader className="animate-spin" />
+            ) : (
+              <Heart
+                fill={isFavoriteMovie ? "red" : "none"}
+                stroke={isFavoriteMovie ? "red" : "black"}
+              />
+            )}
           </Button>
           <Button
             size="icon"
-            onClick={handleWatchListToggle}
+            onClick={() =>
+              onToggleWatchList
+                ? onToggleWatchList(data)
+                : handleWatchListToggle()
+            }
             className="bg-white"
           >
-            <Clapperboard
-              fill={isInWatchList ? "red" : "none"}
-              stroke={isInWatchList ? "red" : "black"}
-            />
+            {loadingStatus || loadingWatchList ? (
+              <Loader className="animate-spin" />
+            ) : (
+              <Clapperboard
+                fill={isInWatchList ? "red" : "none"}
+                stroke={isInWatchList ? "red" : "black"}
+              />
+            )}
           </Button>
         </div>
       </div>
