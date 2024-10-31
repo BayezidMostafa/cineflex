@@ -15,9 +15,7 @@ const API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
 async function fetchMovieDetails(id: string): Promise<MovieDetails> {
   const res = await fetch(
     `https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}`,
-    {
-      next: { revalidate: 60 },
-    }
+    { next: { revalidate: 60 } }
   );
 
   if (!res.ok) throw new Error("Failed to fetch movie details");
@@ -27,9 +25,7 @@ async function fetchMovieDetails(id: string): Promise<MovieDetails> {
 async function fetchMovieCredits(id: string): Promise<CastMember[]> {
   const res = await fetch(
     `https://api.themoviedb.org/3/movie/${id}/credits?api_key=${API_KEY}`,
-    {
-      next: { revalidate: 60 },
-    }
+    { next: { revalidate: 60 } }
   );
 
   if (!res.ok) throw new Error("Failed to fetch movie credits");
@@ -40,9 +36,7 @@ async function fetchMovieCredits(id: string): Promise<CastMember[]> {
 async function fetchMovieRecommendations(id: string): Promise<Movie[]> {
   const res = await fetch(
     `https://api.themoviedb.org/3/movie/${id}/recommendations?api_key=${API_KEY}`,
-    {
-      next: { revalidate: 60 },
-    }
+    { next: { revalidate: 60 } }
   );
 
   if (!res.ok) throw new Error("Failed to fetch movie recommendations");
@@ -67,17 +61,15 @@ const MovieDetailsPage = async ({ params }: MovieDetailsProps) => {
             alt={movie?.title || "Movie Poster"}
             className="rounded-lg object-contain w-full"
           />
-          <span className="absolute top-0 right-5">
+          <div className="absolute top-4 right-5">
             <MovieDetailsActions movie={movie} />
-          </span>
+          </div>
         </div>
         <div className="w-full">
           <h2 className="text-2xl font-semibold">Overview</h2>
           <p className="mt-2">{movie?.overview}</p>
           <h3 className="text-xl font-semibold mt-3">Genres</h3>
-          <p className="">
-            {movie?.genres.map((genre) => genre.name).join(", ")}
-          </p>
+          <p>{movie?.genres.map((genre) => genre.name).join(", ")}</p>
           <p className="mt-4">
             <span className="font-semibold">Release Date:</span>{" "}
             {movie?.release_date

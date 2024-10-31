@@ -1,42 +1,16 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import {
-  getFavoriteList,
-  toggleFavoriteMovie,
-} from "@/app/actions/movieAction";
-import { Movie } from "@/lib/interfaces";
+import React from "react";
 import Card from "@/components/Movie/Card/Card";
 import Skeleton from "@/components/Movie/Card/Skeleton";
+import { useGetMovieList } from "@/lib/hooks/useGetMovieList";
 
 const FavoritesPage: React.FC = () => {
-  const [favoriteList, setFavoriteList] = useState<Movie[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchFavoriteList() {
-      setLoading(true);
-      const data = await getFavoriteList();
-      setFavoriteList(data);
-      setLoading(false);
-    }
-    fetchFavoriteList();
-  }, []);
-
-  const handleToggleFavoriteMovie = async (movie: Movie) => {
-    setFavoriteList((prevList) => {
-      const isFavorite = prevList.some((fav) => fav.id === movie.id);
-      if (isFavorite) {
-        return prevList.filter((fav) => fav.id !== movie.id);
-      } else {
-        return [...prevList, movie];
-      }
-    });
-
-    await toggleFavoriteMovie(movie);
-    const updatedList = await getFavoriteList();
-    setFavoriteList(updatedList);
-  };
+  const {
+    movieList: favoriteList,
+    loading,
+    toggleMovieInList,
+  } = useGetMovieList("favoriteList");
 
   return (
     <div className="min-h-screen mt-5">
@@ -54,7 +28,7 @@ const FavoritesPage: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-5 sm:gap-6 md:gap-8">
           {favoriteList.map((movie) => (
             <Card
-              onToggleFavorite={handleToggleFavoriteMovie}
+              onToggleFavorite={() => toggleMovieInList(movie)}
               data={movie}
               key={movie.id}
             />

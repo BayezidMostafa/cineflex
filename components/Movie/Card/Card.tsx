@@ -1,15 +1,13 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Movie } from "@/lib/interfaces";
-import { Clapperboard, Heart, Loader } from "lucide-react";
+import { Clapperboard, Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import placeholderImage from "@/public/placeholder.png";
-import {
-  toggleWatchList,
-  toggleFavoriteMovie,
-  getMovieStatus,
-} from "@/app/actions/movieAction";
+import { useFavoriteList, useWatchList } from "@/lib/hooks/useMovieList";
 
 interface CardProps {
   data: Movie;
@@ -22,51 +20,19 @@ const Card: React.FC<CardProps> = ({
   onToggleWatchList,
   onToggleFavorite,
 }) => {
-  const [isInWatchList, setIsInWatchList] = useState<boolean>(false);
-  const [isFavoriteMovie, setIsFavoriteMovie] = useState<boolean>(false);
-  const [loadingWatchList, setLoadingWatchList] = useState<boolean>(false);
-  const [loadingFavorite, setLoadingFavorite] = useState<boolean>(false);
-  const [loadingStatus, setLoadingStatus] = useState<boolean>(true); // Initial loading state
-
-  useEffect(() => {
-    let isMounted = true;
-    async function fetchStatus() {
-      setLoadingStatus(true);
-      const status = await getMovieStatus(data?.id);
-      if (isMounted) {
-        setIsInWatchList(status.isInWatchList);
-        setIsFavoriteMovie(status.isFavoriteMovie);
-        setLoadingStatus(false); // Disable initial loading
-      }
-    }
-    fetchStatus();
-    return () => {
-      isMounted = false;
-    };
-  }, [data?.id]);
-
-  const handleWatchListToggle = async () => {
-    setLoadingWatchList(true);
-    setIsInWatchList((prev) => !prev);
-    const result = await toggleWatchList(data);
-    setIsInWatchList(result.isInWatchList);
-    setLoadingWatchList(false);
-  };
-
-  const handleFavoriteMovieToggle = async () => {
-    setLoadingFavorite(true);
-    setIsFavoriteMovie((prev) => !prev);
-    const result = await toggleFavoriteMovie(data);
-    setIsFavoriteMovie(result.isFavoriteMovie);
-    setLoadingFavorite(false);
-  };
+  const { isInWatchList, toggleWatchList } = useWatchList(data);
+  const { isFavorite, toggleFavorite } = useFavoriteList(data);
 
   return (
     <div>
       <div className="relative">
         <Link href={`/movie/${data?.id}`} className="">
           <Image
-            src={`${process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL}${data?.poster_path}`}
+            src={
+              data?.poster_path
+                ? `${process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL}${data?.poster_path}`
+                : placeholderImage.src
+            }
             height={350}
             width={250}
             className="w-full min-h-[340px] object-cover"
@@ -93,38 +59,26 @@ const Card: React.FC<CardProps> = ({
           <Button
             size="icon"
             onClick={() =>
-              onToggleFavorite
-                ? onToggleFavorite(data)
-                : handleFavoriteMovieToggle()
+              onToggleFavorite ? onToggleFavorite(data) : toggleFavorite()
             }
             className="bg-white hover:bg-white/80"
           >
-            {loadingStatus || loadingFavorite ? (
-              <Loader className="animate-spin text-black" />
-            ) : (
-              <Heart
-                fill={isFavoriteMovie ? "red" : "none"}
-                stroke={isFavoriteMovie ? "red" : "black"}
-              />
-            )}
+            <Heart
+              fill={isFavorite ? "red" : "none"}
+              stroke={isFavorite ? "red" : "black"}
+            />
           </Button>
           <Button
             size="icon"
             onClick={() =>
-              onToggleWatchList
-                ? onToggleWatchList(data)
-                : handleWatchListToggle()
+              onToggleWatchList ? onToggleWatchList(data) : toggleWatchList()
             }
             className="bg-white hover:bg-white/80"
           >
-            {loadingStatus || loadingWatchList ? (
-              <Loader className="animate-spin text-black" />
-            ) : (
-              <Clapperboard
-                fill={isInWatchList ? "red" : "none"}
-                stroke={isInWatchList ? "red" : "black"}
-              />
-            )}
+            <Clapperboard
+              fill={isInWatchList ? "red" : "none"}
+              stroke={isInWatchList ? "red" : "black"}
+            />
           </Button>
         </div>
       </div>
