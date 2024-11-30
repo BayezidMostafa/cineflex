@@ -5,10 +5,12 @@ import { X } from "lucide-react";
 import LoginModal from "@/components/Auth/Login/LoginModal";
 import SignUpModal from "@/components/Auth/SignUp/SignUpModal";
 import ParticlesBg from "particles-bg";
+import ForgotPasswordModal from "@/components/Auth/ForgotPassword/ForgotPasswordModal";
 
 const modalComponents: Record<string, React.FC> = {
   SIGN_UP_MODAL: SignUpModal,
   LOGIN_MODAL: LoginModal,
+  FORGOT_PASSWORD_MODAL: ForgotPasswordModal
 };
 
 const Modal: React.FC = () => {

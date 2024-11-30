@@ -102,6 +102,8 @@ const LoginModal: React.FC = () => {
           <span className="text-red-500 text-sm">{error[0]?.message}</span>
         )}
 
+        <p className="cursor-pointer" onClick={() => openModal("FORGOT_PASSWORD_MODAL")}>Forgot Password?</p>
+
         {/* Submit Button */}
         <Button type="submit" className="w-full" disabled={isLoading}>
           Login {isLoading && <Loader className="animate-spin" />}
