@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/store/useModalStore";
 import { useSignUp } from "@clerk/clerk-react";
 import toast from "react-hot-toast";
-import { Loader } from "lucide-react";
+import { Eye, EyeOff, Loader } from "lucide-react";
+import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
+import { ClerkAPIError } from "@clerk/types";
 
 interface SignUpFormInputs {
   email: string;
@@ -23,6 +25,8 @@ const SignUpModal: React.FC = () => {
   const { openModal } = useModalStore();
   const { isLoaded, signUp, setActive } = useSignUp();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = React.useState<ClerkAPIError[]>();
+  const [type, setType] = useState("password");
   const {
     register,
     handleSubmit,
@@ -42,6 +46,7 @@ const SignUpModal: React.FC = () => {
   const onSubmit: SubmitHandler<SignUpFormInputs> = async (data) => {
     if (!isLoaded) return;
     setLoading(true);
+    setError([])
     try {
       await signUp?.create({
         emailAddress: data?.email,
@@ -50,9 +55,10 @@ const SignUpModal: React.FC = () => {
 
       await signUp?.prepareEmailAddressVerification({ strategy: "email_code" });
       setPendingVerification(true);
-    } catch (error) {
+    } catch (err) {
       setLoading(false);
-      console.error("Sign-up Error:", error);
+      if (isClerkAPIResponseError(err)) setError(err.errors);
+      console.error(JSON.stringify(err, null, 2));
       toast.error("Failed to sign up. Please try again.");
     }
   };
@@ -73,9 +79,9 @@ const SignUpModal: React.FC = () => {
       } else {
         toast.error("Verification failed. Please try again.");
       }
-    } catch (error) {
-      console.error("Verification Error:", error);
-      toast.error("Failed to verify. Please try again.");
+    } catch (err) {
+      if (isClerkAPIResponseError(err)) setError(err.errors);
+      console.error(JSON.stringify(err, null, 2));
     }
   };
 
@@ -92,6 +98,8 @@ const SignUpModal: React.FC = () => {
               <label className="font-medium">Verification Code</label>
               <input
                 type="text"
+                autoComplete="off"
+                defaultValue={""}
                 className={`w-full px-4 py-2 border ${
                   verifyErrors.code ? "border-red-500" : "border-gray-300"
                 } rounded-lg outline-none`}
@@ -106,7 +114,11 @@ const SignUpModal: React.FC = () => {
                 </span>
               )}
             </div>
-
+            {error && (
+              <span className="text-red-500 text-sm">
+                {error[0]?.longMessage}
+              </span>
+            )}
             {/* Submit Button */}
             <Button type="submit" className="w-full">
               Verify
@@ -124,6 +136,7 @@ const SignUpModal: React.FC = () => {
               <label className="font-medium">Email</label>
               <input
                 type="email"
+                autoComplete="off"
                 className={`w-full px-4 py-2 border ${
                   errors.email ? "border-red-500" : "border-gray-300"
                 } rounded-lg outline-none`}
@@ -146,20 +159,30 @@ const SignUpModal: React.FC = () => {
             {/* Password Field */}
             <div>
               <label className="font-medium">Password</label>
-              <input
-                type="password"
-                className={`w-full px-4 py-2 border ${
-                  errors.password ? "border-red-500" : "border-gray-300"
-                } rounded-lg outline-none`}
-                placeholder="Enter your password"
-                {...register("password", {
-                  required: "Password is required",
-                  minLength: {
-                    value: 6,
-                    message: "Password must be at least 6 characters long",
-                  },
-                })}
-              />
+              <div className="relative">
+                <input
+                  type={type}
+                  autoComplete="off"
+                  className={`w-full ps-4 pe-10 py-2 border ${
+                    errors.password ? "border-red-500" : "border-gray-300"
+                  } rounded-lg outline-none`}
+                  placeholder="Enter your password"
+                  {...register("password", {
+                    required: "Password is required",
+                    minLength: {
+                      value: 6,
+                      message: "Password must be at least 6 characters long",
+                    },
+                  })}
+                />
+                <span className="absolute right-2 top-2 cursor-pointer">
+                  {type === "password" ? (
+                    <EyeOff className="" onClick={() => setType("text")} />
+                  ) : (
+                    <Eye className="" onClick={() => setType("password")} />
+                  )}
+                </span>
+              </div>
               {errors.password && (
                 <span className="text-red-500 text-sm">
                   {errors.password.message}
@@ -170,24 +193,39 @@ const SignUpModal: React.FC = () => {
             {/* Confirm Password Field */}
             <div>
               <label className="font-medium">Confirm Password</label>
-              <input
-                type="password"
-                className={`w-full px-4 py-2 border ${
-                  errors.confirmPassword ? "border-red-500" : "border-gray-300"
-                } rounded-lg outline-none`}
-                placeholder="Confirm your password"
-                {...register("confirmPassword", {
-                  required: "Confirm Password is required",
-                  validate: (value) =>
-                    value === password || "Passwords do not match",
-                })}
-              />
+              <div className="relative">
+                <input
+                  type={type}
+                  autoComplete="off"
+                  className={`w-full ps-4 pe-10 py-2 border ${
+                    errors.confirmPassword
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  } rounded-lg outline-none`}
+                  placeholder="Confirm your password"
+                  {...register("confirmPassword", {
+                    required: "Confirm Password is required",
+                    validate: (value) =>
+                      value === password || "Passwords do not match",
+                  })}
+                />
+                <span className="absolute right-2 top-2 cursor-pointer">
+                  {type === "password" ? (
+                    <EyeOff className="" onClick={() => setType("text")} />
+                  ) : (
+                    <Eye className="" onClick={() => setType("password")} />
+                  )}
+                </span>
+              </div>
               {errors.confirmPassword && (
                 <span className="text-red-500 text-sm">
                   {errors.confirmPassword.message}
                 </span>
               )}
             </div>
+            {error && (
+              <span className="text-red-500 text-sm">{error[0]?.message}</span>
+            )}
 
             {/* Submit Button */}
             <Button type="submit" className="w-full" disabled={loading}>
