@@ -115,13 +115,13 @@ const ForgotPasswordModal = () => {
             <p className="text-red-500">{forgotPasswordErrors.email.message}</p>
           )}
 
+          {error && <p className="text-red-500">{error}</p>}
           <div className="flex flex-col sm:flex-row gap-2">
             <Button className="w-full" type="submit">Send password reset code</Button>
             <Button className="w-full" type="button" onClick={() => closeModal()}>
               Cancel
             </Button>
           </div>
-          {error && <p className="text-red-500">{error}</p>}
         </form>
       ) : (
         <form
