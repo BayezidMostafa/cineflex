@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
-        domains: ['image.tmdb.org'], // Allow images from TMDB
+        domains: ['image.tmdb.org', 'i.ibb.co'], // Allow images from TMDB and ImgBB
     },
 };
 

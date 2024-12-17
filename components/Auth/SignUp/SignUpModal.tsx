@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/store/useModalStore";
 import { useSignUp } from "@clerk/clerk-react";
 import toast from "react-hot-toast";
-import { Eye, EyeOff, Loader } from "lucide-react";
+import { CircleUserRound, Eye, EyeOff, Loader, X } from "lucide-react";
 import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
 import { ClerkAPIError } from "@clerk/types";
 import { Input } from "@/components/ui/input";
+import Image from "next/image";
 
 interface SignUpFormInputs {
   email: string;
@@ -25,6 +26,9 @@ const SignUpModal: React.FC = () => {
   const [error, setError] = React.useState<ClerkAPIError[]>();
   const [verificationCode, setVerificationCode] = useState("");
   const [type, setType] = useState("password");
+  const [image, setImage] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageLoader, setImageLoader] = useState(false);
   const {
     register,
     handleSubmit,
@@ -32,7 +36,58 @@ const SignUpModal: React.FC = () => {
     watch,
   } = useForm<SignUpFormInputs>();
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const password = watch("password");
+
+  // Handle Image Selection
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setImageLoader(true);
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImage(URL.createObjectURL(file)); // Preview image instantly
+      uploadImageToImgBB(file); // Start background upload
+      setImageLoader(false);
+    }
+  };
+
+  const removeImage = () => {
+    setImage(null); // Reset image preview
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""; // Reset file input value
+    }
+  };
+
+  // Upload Image to ImgBB
+  const uploadImageToImgBB = async (file: File) => {
+    const formData = new FormData();
+    formData.append("image", file);
+    try {
+      setImageLoader(true);
+      const response = await fetch(
+        `https://api.imgbb.com/1/upload?key=${process.env.NEXT_PUBLIC_IMGBB_API_KEY}`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const result = await response.json();
+      if (result.success) {
+        setImage(result.data.url); // Set the uploaded image URL
+        toast.success("Image uploaded successfully!");
+        setImageLoader(false);
+      } else {
+        toast.error("Failed to upload image. Try again.");
+        setImageLoader(false);
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast.error("Error uploading image. Please try again.");
+      setImageLoader(false);
+    }
+  };
 
   // Step 1: Sign Up Process
   const onSubmit: SubmitHandler<SignUpFormInputs> = async (data) => {
@@ -86,6 +141,10 @@ const SignUpModal: React.FC = () => {
     }
   };
 
+
+  console.log(imageLoader);
+  console.log(image)
+
   return (
     <div className="max-w-sm mx-auto p-3 sm:p-6">
       {pendingVerification ? (
@@ -132,6 +191,44 @@ const SignUpModal: React.FC = () => {
           <h2 className="text-xl md:text-2xl font-bold text-center mb-4">
             Sign Up
           </h2>
+          <div className="flex flex-col items-center mb-3 relative">
+            {/* Image Upload Section */}
+            {image && !imageLoader && (
+              <X
+                onClick={removeImage}
+                className="absolute right-10 top-1 cursor-pointer"
+              />
+            )}
+            <label htmlFor="file-upload" className="cursor-pointer">
+              {image ? (
+                <div className="relative w-36 h-36">
+                  <Image
+                    src={image}
+                    alt="Uploaded"
+                    layout="fill"
+                    className={`object-contain rounded-full border-2 ${
+                      imageLoader
+                        ? "border-primary border-dashed animate-pulse"
+                        : "border-transparent"
+                    }`}
+                  />
+                </div>
+              ) : (
+                <CircleUserRound strokeWidth={1} height={120} width={120} />
+              )}
+            </label>
+            <input
+              id="file-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              disabled={imageLoader}
+              onChange={handleImageChange}
+            />
+            {!image && (
+              <span className="mt-2">Click to upload profile image</span>
+            )}
+          </div>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Email Field */}
             <div>
