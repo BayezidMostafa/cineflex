@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import useDebounce from "@/lib/hooks/useDebounce";
 import Card from "@/components/Movie/Card/Card";
 import Skeleton from "@/components/Movie/Card/Skeleton";
+import { useUser } from "@clerk/clerk-react";
 
 interface SearchFormData {
   search: string;
@@ -109,6 +110,12 @@ const Home = () => {
   const handleSuggestionClick = (title: string) => {
     router.push(`/search?query=${encodeURIComponent(title)}`);
   };
+
+  const { user } = useUser();
+
+  useEffect(() => {
+    console.log("User information:", user);
+  }, [user]);
 
   return (
     <div className="mt-5 mb-8">
