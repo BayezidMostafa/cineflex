@@ -9,6 +9,8 @@ import toast from "react-hot-toast";
 import { Loader } from "lucide-react";
 import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
 import { ClerkAPIError } from "@clerk/types";
+import { usePathname } from "next/navigation";
+import SignUpLink from "@/components/common/Links/sign-up-link";
 
 interface LoginFormInputs {
   email: string;
@@ -25,6 +27,7 @@ const LoginModal: React.FC = () => {
   const { isLoaded, signIn, setActive } = useSignIn();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = React.useState<ClerkAPIError[]>();
+  const pathname = usePathname();
 
   const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
     if (!isLoaded || !signIn) return;
@@ -102,21 +105,34 @@ const LoginModal: React.FC = () => {
           <span className="text-red-500 text-sm">{error[0]?.message}</span>
         )}
 
-        <p className="cursor-pointer" onClick={() => openModal("FORGOT_PASSWORD_MODAL")}>Forgot Password?</p>
+        <p
+          className="cursor-pointer"
+          onClick={() => openModal("FORGOT_PASSWORD_MODAL")}
+        >
+          Forgot Password?
+        </p>
 
         {/* Submit Button */}
         <Button type="submit" className="w-full" disabled={isLoading}>
           Login {isLoading && <Loader className="animate-spin" />}
         </Button>
-        <p>
-          Don&apos;t have an account?{" "}
-          <span
-            className="underline underline-offset-2 cursor-pointer"
-            onClick={() => openModal("SIGN_UP_MODAL")}
-          >
-            Signup
-          </span>
-        </p>
+        {pathname === "/login" ? (
+          <>
+            <SignUpLink />
+          </>
+        ) : (
+          <>
+            <p>
+              Don&apos;t have an account?{" "}
+              <span
+                className="underline underline-offset-2 cursor-pointer"
+                onClick={() => openModal("SIGN_UP_MODAL")}
+              >
+                Signup
+              </span>
+            </p>
+          </>
+        )}
       </form>
     </div>
   );

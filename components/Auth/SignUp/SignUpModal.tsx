@@ -11,6 +11,8 @@ import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
 import { ClerkAPIError } from "@clerk/types";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
+import SignInLink from "@/components/common/Links/sign-in-link";
 
 interface SignUpFormInputs {
   email: string;
@@ -26,9 +28,10 @@ const SignUpModal: React.FC = () => {
   const [error, setError] = React.useState<ClerkAPIError[]>();
   const [verificationCode, setVerificationCode] = useState("");
   const [type, setType] = useState("password");
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [image, setImage] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageLoader, setImageLoader] = useState(false);
+  const pathname = usePathname();
   const {
     register,
     handleSubmit,
@@ -45,7 +48,6 @@ const SignUpModal: React.FC = () => {
     setImageLoader(true);
     const file = e.target.files?.[0];
     if (file) {
-      setImageFile(file);
       setImage(URL.createObjectURL(file)); // Preview image instantly
       uploadImageToImgBB(file); // Start background upload
       setImageLoader(false);
@@ -63,8 +65,8 @@ const SignUpModal: React.FC = () => {
   const uploadImageToImgBB = async (file: File) => {
     const formData = new FormData();
     formData.append("image", file);
+
     try {
-      setImageLoader(true);
       const response = await fetch(
         `https://api.imgbb.com/1/upload?key=${process.env.NEXT_PUBLIC_IMGBB_API_KEY}`,
         {
@@ -75,16 +77,15 @@ const SignUpModal: React.FC = () => {
 
       const result = await response.json();
       if (result.success) {
-        setImage(result.data.url); // Set the uploaded image URL
+        setUploadedImage(result.data.url);
         toast.success("Image uploaded successfully!");
-        setImageLoader(false);
       } else {
-        toast.error("Failed to upload image. Try again.");
-        setImageLoader(false);
+        toast.error("Failed to upload image.");
       }
     } catch (error) {
-      console.error("Error uploading image:", error);
-      toast.error("Error uploading image. Please try again.");
+      console.error("Image upload error:", error);
+      toast.error("Upload failed. Try again.");
+    } finally {
       setImageLoader(false);
     }
   };
@@ -141,10 +142,7 @@ const SignUpModal: React.FC = () => {
     }
   };
 
-
-  console.log(imageLoader);
-  console.log(image)
-
+  console.log(uploadedImage);
   return (
     <div className="max-w-sm mx-auto p-3 sm:p-6">
       {pendingVerification ? (
@@ -330,15 +328,23 @@ const SignUpModal: React.FC = () => {
             <Button type="submit" className="w-full" disabled={loading}>
               Sign Up {loading && <Loader className="animate-spin" />}
             </Button>
-            <p>
-              Already have an account?{" "}
-              <span
-                className="underline underline-offset-2 cursor-pointer"
-                onClick={() => openModal("LOGIN_MODAL")}
-              >
-                Login
-              </span>
-            </p>
+            {pathname === "/signup" ? (
+              <>
+                <SignInLink />
+              </>
+            ) : (
+              <>
+                <p>
+                  Already have an account?
+                  <span
+                    className="underline underline-offset-2 cursor-pointer"
+                    onClick={() => openModal("LOGIN_MODAL")}
+                  >
+                    Login
+                  </span>
+                </p>
+              </>
+            )}
           </form>
         </div>
       )}

@@ -1,8 +1,11 @@
 import React from "react";
 import Image from "next/image";
-import { CastMember, MovieDetails, Movie } from "@/lib/interfaces";
+import { MovieDetails, Movie } from "@/lib/interfaces";
+import { CastMember } from "@/components/Sliders/CastsSlider";
 import RecommendedMoviesSlider from "@/components/Sliders/RecommendedMovieSlider";
 import MovieDetailsActions from "@/components/DetailsPage/MovieDetailsActions";
+import CastsSlider from "@/components/Sliders/CastsSlider";
+import TrailerModal from "@/components/DetailsPage/MovieTrailerModal";
 
 interface MovieDetailsProps {
   params: {
@@ -17,7 +20,6 @@ async function fetchMovieDetails(id: string): Promise<MovieDetails> {
     `https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}`,
     { next: { revalidate: 60 } }
   );
-
   if (!res.ok) throw new Error("Failed to fetch movie details");
   return res.json();
 }
@@ -27,7 +29,6 @@ async function fetchMovieCredits(id: string): Promise<CastMember[]> {
     `https://api.themoviedb.org/3/movie/${id}/credits?api_key=${API_KEY}`,
     { next: { revalidate: 60 } }
   );
-
   if (!res.ok) throw new Error("Failed to fetch movie credits");
   const data = await res.json();
   return data.cast;
@@ -38,8 +39,19 @@ async function fetchMovieRecommendations(id: string): Promise<Movie[]> {
     `https://api.themoviedb.org/3/movie/${id}/recommendations?api_key=${API_KEY}`,
     { next: { revalidate: 60 } }
   );
-
   if (!res.ok) throw new Error("Failed to fetch movie recommendations");
+  const data = await res.json();
+  return data.results;
+}
+
+async function fetchMovieVideos(
+  id: string
+): Promise<{ key: string; site: string; type: string }[]> {
+  const res = await fetch(
+    `https://api.themoviedb.org/3/movie/${id}/videos?api_key=${API_KEY}`,
+    { next: { revalidate: 60 } }
+  );
+  if (!res.ok) throw new Error("Failed to fetch movie videos");
   const data = await res.json();
   return data.results;
 }
@@ -48,6 +60,12 @@ const MovieDetailsPage = async ({ params }: MovieDetailsProps) => {
   const movie = await fetchMovieDetails(params.id);
   const cast = await fetchMovieCredits(params.id);
   const recommendations = await fetchMovieRecommendations(params.id);
+  const videos = await fetchMovieVideos(params.id);
+
+  // pick the first YouTube trailer
+  const trailer = videos.find(
+    (v) => v.site === "YouTube" && v.type === "Trailer"
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -61,10 +79,11 @@ const MovieDetailsPage = async ({ params }: MovieDetailsProps) => {
             alt={movie?.title || "Movie Poster"}
             className="rounded-lg object-contain w-full"
           />
-          <div className="absolute top-4 right-5">
+          <div className="absolute top-4 right-5 flex flex-col items-end gap-2">
             <MovieDetailsActions movie={movie} />
           </div>
         </div>
+
         <div className="w-full">
           <h2 className="text-2xl font-semibold">Overview</h2>
           <p className="mt-2">{movie?.overview}</p>
@@ -73,7 +92,7 @@ const MovieDetailsPage = async ({ params }: MovieDetailsProps) => {
           <p className="mt-4">
             <span className="font-semibold">Release Date:</span>{" "}
             {movie?.release_date
-              ? new Date(movie?.release_date).toLocaleDateString("en-US", {
+              ? new Date(movie.release_date).toLocaleDateString("en-US", {
                   month: "long",
                   day: "numeric",
                   year: "numeric",
@@ -84,37 +103,19 @@ const MovieDetailsPage = async ({ params }: MovieDetailsProps) => {
             <span className="font-semibold">Rating:</span>{" "}
             <span
               className={`font-semibold ${
-                movie?.vote_average > 7
+                movie.vote_average > 7
                   ? "text-green-500"
-                  : movie?.vote_average >= 5
+                  : movie.vote_average >= 5
                   ? "text-yellow-500"
                   : "text-red-500"
               }`}
             >
-              {movie?.vote_average.toFixed(1)}
+              {movie.vote_average.toFixed(1)}
             </span>
           </p>
-
+          <TrailerModal trailerKey={trailer?.key} />
           <h3 className="text-xl font-semibold mt-4">Cast</h3>
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 gap-4 mt-2">
-            {cast?.slice(0, 12).map((member) => (
-              <div key={member?.cast_id} className="text-center">
-                <Image
-                  src={
-                    member?.profile_path
-                      ? `https://image.tmdb.org/t/p/w200${member?.profile_path}`
-                      : "/placeholder.png"
-                  }
-                  alt={member?.name}
-                  width={100}
-                  height={150}
-                  className="rounded-lg mx-auto w-full"
-                />
-                <p className="mt-2 font-medium">{member?.name}</p>
-                <p className="text-sm text-gray-500">{member?.character}</p>
-              </div>
-            ))}
-          </div>
+          <CastsSlider cast={cast} />
         </div>
       </div>
 
