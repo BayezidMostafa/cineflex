@@ -99,6 +99,7 @@ export default async function MovieDetailsPage({
             width={500}
             height={750}
             alt={movie.title}
+            loading="lazy"
             className="rounded-lg object-contain w-full"
           />
           <div className="absolute top-4 right-5 flex flex-col items-end gap-2">
