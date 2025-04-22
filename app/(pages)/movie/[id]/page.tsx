@@ -1,3 +1,4 @@
+// app/movies/[id]/page.tsx
 import React from "react";
 import Image from "next/image";
 import { MovieDetails, Movie } from "@/lib/interfaces";
@@ -7,13 +8,27 @@ import MovieDetailsActions from "@/components/DetailsPage/MovieDetailsActions";
 import CastsSlider from "@/components/Sliders/CastsSlider";
 import TrailerModal from "@/components/DetailsPage/MovieTrailerModal";
 
-interface MovieDetailsProps {
-  params: {
-    id: string;
-  };
+interface MovieDetailsPageProps {
+  params: { id: string };
 }
 
-const API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+const API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY!;
+
+// cache the HTML for 60 seconds
+export const revalidate = 60;
+
+// build your top 10 popular movies at deploy time
+export async function generateStaticParams() {
+  const res = await fetch(
+    `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}`,
+    { next: { revalidate: 3600 } }
+  );
+  if (!res.ok) return [];
+  const { results } = await res.json();
+  return results.slice(0, 10).map((m: Movie) => ({
+    id: m.id.toString(),
+  }));
+}
 
 async function fetchMovieDetails(id: string): Promise<MovieDetails> {
   const res = await fetch(
@@ -39,7 +54,7 @@ async function fetchMovieRecommendations(id: string): Promise<Movie[]> {
     `https://api.themoviedb.org/3/movie/${id}/recommendations?api_key=${API_KEY}`,
     { next: { revalidate: 60 } }
   );
-  if (!res.ok) throw new Error("Failed to fetch movie recommendations");
+  if (!res.ok) throw new Error("Failed to fetch recommendations");
   const data = await res.json();
   return data.results;
 }
@@ -51,16 +66,23 @@ async function fetchMovieVideos(
     `https://api.themoviedb.org/3/movie/${id}/videos?api_key=${API_KEY}`,
     { next: { revalidate: 60 } }
   );
-  if (!res.ok) throw new Error("Failed to fetch movie videos");
+  if (!res.ok) throw new Error("Failed to fetch videos");
   const data = await res.json();
   return data.results;
 }
 
-const MovieDetailsPage = async ({ params }: MovieDetailsProps) => {
-  const movie = await fetchMovieDetails(params.id);
-  const cast = await fetchMovieCredits(params.id);
-  const recommendations = await fetchMovieRecommendations(params.id);
-  const videos = await fetchMovieVideos(params.id);
+export default async function MovieDetailsPage({
+  params,
+}: MovieDetailsPageProps) {
+  const { id } = params;
+
+  // run all 4 requests in parallel
+  const [movie, cast, recommendations, videos] = await Promise.all([
+    fetchMovieDetails(id),
+    fetchMovieCredits(id),
+    fetchMovieRecommendations(id),
+    fetchMovieVideos(id),
+  ]);
 
   // pick the first YouTube trailer
   const trailer = videos.find(
@@ -69,14 +91,14 @@ const MovieDetailsPage = async ({ params }: MovieDetailsProps) => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-4">{movie?.title}</h1>
+      <h1 className="text-3xl font-bold mb-4">{movie.title}</h1>
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="w-full relative">
           <Image
-            src={`https://image.tmdb.org/t/p/w500${movie?.poster_path}`}
+            src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
             width={500}
             height={750}
-            alt={movie?.title || "Movie Poster"}
+            alt={movie.title}
             className="rounded-lg object-contain w-full"
           />
           <div className="absolute top-4 right-5 flex flex-col items-end gap-2">
@@ -86,12 +108,14 @@ const MovieDetailsPage = async ({ params }: MovieDetailsProps) => {
 
         <div className="w-full">
           <h2 className="text-2xl font-semibold">Overview</h2>
-          <p className="mt-2">{movie?.overview}</p>
+          <p className="mt-2">{movie.overview}</p>
+
           <h3 className="text-xl font-semibold mt-3">Genres</h3>
-          <p>{movie?.genres.map((genre) => genre.name).join(", ")}</p>
+          <p>{movie.genres.map((g) => g.name).join(", ")}</p>
+
           <p className="mt-4">
             <span className="font-semibold">Release Date:</span>{" "}
-            {movie?.release_date
+            {movie.release_date
               ? new Date(movie.release_date).toLocaleDateString("en-US", {
                   month: "long",
                   day: "numeric",
@@ -99,6 +123,7 @@ const MovieDetailsPage = async ({ params }: MovieDetailsProps) => {
                 })
               : "No date found"}
           </p>
+
           <p className="mt-2">
             <span className="font-semibold">Rating:</span>{" "}
             <span
@@ -113,19 +138,18 @@ const MovieDetailsPage = async ({ params }: MovieDetailsProps) => {
               {movie.vote_average.toFixed(1)}
             </span>
           </p>
+
           <TrailerModal trailerKey={trailer?.key} />
+
           <h3 className="text-xl font-semibold mt-4 mb-1">Cast</h3>
           <CastsSlider cast={cast} />
         </div>
       </div>
 
-      {/* Recommendations Section */}
-      <div className="mt-10 recommended-slider">
+      <div className="mt-10">
         <h2 className="text-2xl font-semibold mb-4">Recommended Movies</h2>
         <RecommendedMoviesSlider recommendations={recommendations} />
       </div>
     </div>
   );
-};
-
-export default MovieDetailsPage;
+}
