@@ -2,8 +2,11 @@
 
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Scrollbar } from "swiper/modules";
+import { Autoplay, FreeMode } from "swiper/modules";
 import Image from "next/image";
+import "swiper/css";
+import "swiper/css/scrollbar";
+
 export interface CastMember {
   adult: boolean;
   gender: number;
@@ -26,52 +29,44 @@ interface CastsSliderProps {
 const CastsSlider: React.FC<CastsSliderProps> = ({ cast }) => {
   return (
     <Swiper
-      scrollbar={{
-        hide: true,
+      modules={[ Autoplay, FreeMode]}
+      loop={true}
+      speed={1000} // time (ms) it takes to move one slide width
+      autoplay={{
+        delay: 0, // no pause between transitions
+        disableOnInteraction: false,
       }}
-      modules={[Scrollbar]}
+      freeMode={{
+        enabled: true, // let slides flow continuously
+        sticky: false, // don’t snap to slides
+      }}
       slidesPerView={5}
-      spaceBetween={5}
+      spaceBetween={10}
       breakpoints={{
-        // when window width is >= 320px
-        320: {
-          slidesPerView: 1,
-        },
-        // when window width is >= 480px
-        480: {
-          slidesPerView: 2,
-        },
-        // when window width is >= 768px
-        768: {
-          slidesPerView: 3,
-        },
-        // when window width is >= 1024px
-        1024: {
-          slidesPerView: 4,
-        },
-        // when window width is >= 1280px
-        1280: {
-          slidesPerView: 5,
-        },
+        320: { slidesPerView: 1 },
+        480: { slidesPerView: 2 },
+        768: { slidesPerView: 3 },
+        1024: { slidesPerView: 4 },
+        1280: { slidesPerView: 5 },
       }}
-      className="max-w-[600px]"
+      className="relative max-w-[600px] casts-slider"
     >
-      {cast?.map((member) => (
-        <SwiperSlide key={member?.cast_id}>
+      {cast.map((member) => (
+        <SwiperSlide key={member.cast_id}>
           <div className="text-center">
             <Image
               src={
-                member?.profile_path
-                  ? `https://image.tmdb.org/t/p/w200${member?.profile_path}`
+                member.profile_path
+                  ? `https://image.tmdb.org/t/p/w200${member.profile_path}`
                   : "/placeholder.png"
               }
-              alt={member?.name}
+              alt={member.name}
               width={100}
               height={150}
               className="rounded-lg mx-auto w-full"
             />
-            <p className="mt-2 font-medium">{member?.name}</p>
-            <p className="text-sm text-gray-500">{member?.character}</p>
+            <p className="mt-2 font-medium">{member.name}</p>
+            <p className="text-sm text-gray-500">{member.character}</p>
           </div>
         </SwiperSlide>
       ))}

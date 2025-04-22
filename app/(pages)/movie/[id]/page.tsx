@@ -114,7 +114,7 @@ const MovieDetailsPage = async ({ params }: MovieDetailsProps) => {
             </span>
           </p>
           <TrailerModal trailerKey={trailer?.key} />
-          <h3 className="text-xl font-semibold mt-4">Cast</h3>
+          <h3 className="text-xl font-semibold mt-4 mb-1">Cast</h3>
           <CastsSlider cast={cast} />
         </div>
       </div>

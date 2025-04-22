@@ -1,7 +1,7 @@
 // components/DetailsPage/MovieTrailerModal.tsx
 
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -27,8 +27,28 @@ const modalVariants = {
 
 const TrailerModal: React.FC<TrailerModalProps> = ({ trailerKey }) => {
   const [isOpen, setIsOpen] = useState(false);
-  if (!trailerKey) return null;
 
+  // Prevent background scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [isOpen]);
+
+  if (!trailerKey) return null;
   return (
     <>
       <TooltipProvider>
@@ -38,6 +58,7 @@ const TrailerModal: React.FC<TrailerModalProps> = ({ trailerKey }) => {
               onClick={() => setIsOpen(true)}
               className="flex items-center gap-1 hover:opacity-80 mt-2"
             >
+              {/* YouTube icon */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="48"
@@ -67,13 +88,15 @@ const TrailerModal: React.FC<TrailerModalProps> = ({ trailerKey }) => {
             animate="visible"
             exit="hidden"
             style={{ backgroundColor: "rgba(0,0,0,0.75)" }}
+            onClick={() => setIsOpen(false)} // close on backdrop click
           >
             <motion.div
-              className="relative w-full max-w-3xl aspect-video"
+              className="relative w-full max-w-7xl aspect-video"
               variants={modalVariants}
               initial="hidden"
               animate="visible"
               exit="hidden"
+              onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
             >
               <iframe
                 src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1`}

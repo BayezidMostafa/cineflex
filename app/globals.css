@@ -93,6 +93,27 @@ body {
   background: var(--scrollbar-thumb-color);
   width: 12px;
 }
+.casts-slider .swiper-scrollbar {
+  height: 6px !important;
+  background: var(--scrollbar-color);
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+.casts-slider .swiper-scrollbar-drag {
+  background: var(--scrollbar-thumb-color);
+  border-radius: 5px;
+  transition: background 0.3s ease, width 0.3s ease;
+}
+
+.casts-slider:hover .swiper-scrollbar {
+  background: var(--scrollbar-color);
+}
+
+.casts-slider:hover .swiper-scrollbar-drag {
+  background: var(--scrollbar-thumb-color);
+  width: 12px;
+}
 
 @layer base {
   * {
