@@ -31,7 +31,7 @@ const Card: React.FC<CardProps> = ({
             src={
               data?.poster_path
                 ? `${process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL}${data?.poster_path}`
-                : placeholderImage.src
+                : placeholderImage
             }
             height={350}
             width={250}
