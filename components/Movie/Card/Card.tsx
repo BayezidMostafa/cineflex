@@ -1,13 +1,14 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Movie } from "@/lib/interfaces";
 import { Clapperboard, Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
 import placeholderImage from "@/public/placeholder.png";
 import { useFavoriteList, useWatchList } from "@/lib/hooks/useMovieList";
+import getBase64 from "@/lib/getLocalBase64";
 
 interface CardProps {
   data: Movie;
@@ -22,6 +23,21 @@ const Card: React.FC<CardProps> = ({
 }) => {
   const { isInWatchList, toggleWatchList } = useWatchList(data);
   const { isFavorite, toggleFavorite } = useFavoriteList(data);
+  const [blurDataURL, setBlurDataURL] = useState<string | null>(null);
+
+  // Fetch the placeholder image when the component mounts
+  useEffect(() => {
+    if (data?.poster_path) {
+      const imageUrl = `https://res.cloudinary.com/dgxnbfdpv/image/upload/v1745398206/placeholder_sufa96.png`;
+      const fetchPlaceholder = async () => {
+        const base64 = await getBase64(imageUrl);
+        if (base64) {
+          setBlurDataURL(base64);
+        }
+      };
+      fetchPlaceholder();
+    }
+  }, [data?.poster_path]);
 
   return (
     <div>
@@ -39,7 +55,7 @@ const Card: React.FC<CardProps> = ({
             alt={data?.title || "movie-poster"}
             loading="lazy"
             placeholder="blur"
-            blurDataURL={placeholderImage.src}
+            blurDataURL={blurDataURL || placeholderImage.src}
           />
         </Link>
         <div className="absolute bottom-3 right-3 bg-white backdrop-blur px-2 py-1 rounded-md">
