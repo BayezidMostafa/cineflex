@@ -6,9 +6,7 @@ import { Movie } from "@/lib/interfaces";
 import { Clapperboard, Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import placeholderImage from "@/public/placeholder.png";
 import { useFavoriteList, useWatchList } from "@/lib/hooks/useMovieList";
-import getBase64 from "@/lib/getLocalBase64";
 
 interface CardProps {
   data: Movie;
@@ -23,39 +21,42 @@ const Card: React.FC<CardProps> = ({
 }) => {
   const { isInWatchList, toggleWatchList } = useWatchList(data);
   const { isFavorite, toggleFavorite } = useFavoriteList(data);
-  const [blurDataURL, setBlurDataURL] = useState<string | null>(null);
 
-  // Fetch the placeholder image when the component mounts
+  const [blurDataURL, setBlurDataURL] = useState<string | null>(null);
+  const posterUrl = `${process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL}${data?.poster_path}`;
+
   useEffect(() => {
-    if (data?.poster_path) {
-      const imageUrl = `https://res.cloudinary.com/dgxnbfdpv/image/upload/v1745398206/placeholder_sufa96.png`;
-      const fetchPlaceholder = async () => {
-        const base64 = await getBase64(imageUrl);
-        if (base64) {
-          setBlurDataURL(base64);
-        }
-      };
-      fetchPlaceholder();
+    async function getBlurData() {
+      try {
+        const res = await fetch("/api/blur", {
+          method: "POST",
+          body: JSON.stringify({ imageUrl: posterUrl }),
+          headers: { "Content-Type": "application/json" },
+        });
+        const { base64 } = await res.json();
+        setBlurDataURL(base64);
+      } catch (error) {
+        console.error("Error fetching blur placeholder:", error);
+      }
     }
-  }, [data?.poster_path]);
+    getBlurData();
+  }, [posterUrl]);
 
   return (
     <div>
       <div className="relative">
-        <Link href={`/movie/${data?.id}`} className="">
+        <Link href={`/movie/${data?.id}`}>
           <Image
-            src={
-              data?.poster_path
-                ? `${process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL}${data?.poster_path}`
-                : placeholderImage
-            }
+            src={posterUrl}
             height={350}
             width={250}
             className="w-full min-h-[340px] object-cover"
             alt={data?.title || "movie-poster"}
             loading="lazy"
-            placeholder="blur"
-            blurDataURL={blurDataURL || placeholderImage.src}
+            {...(blurDataURL && {
+              placeholder: "blur",
+              blurDataURL,
+            })}
           />
         </Link>
         <div className="absolute bottom-3 right-3 bg-white backdrop-blur px-2 py-1 rounded-md">
