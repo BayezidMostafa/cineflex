@@ -10,6 +10,7 @@ import useDebounce from "@/lib/hooks/useDebounce";
 import Card from "@/components/Movie/Card/Card";
 import Skeleton from "@/components/Movie/Card/Skeleton";
 import { useUser } from "@clerk/clerk-react";
+import AdvancedFilterDialog from "@/components/filter/filter";
 
 interface SearchFormData {
   search: string;
@@ -121,40 +122,45 @@ const Home = () => {
     <div className="mt-5 mb-8">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 relative">
         <h1 className="text-xl sm:text-2xl font-bold">Popular Movies</h1>
-        <div className="relative sm:max-w-sm w-full">
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="flex flex-col gap-2"
-          >
-            <input
-              {...register("search", {
-                required: "Please enter a search term",
-                minLength: {
-                  value: 3,
-                  message: "Search term must be at least 3 characters",
-                },
-              })}
-              type="text"
-              placeholder="Search movies..."
-              className="border p-2 rounded w-full outline-none"
-            />
-            {errors.search && (
-              <p className="text-red-500 mt-1">{errors.search.message}</p>
+        <div className="sm:max-w-md w-full flex items-center gap-4 ">
+          <div className="relative w-full">
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              className="flex flex-col gap-2"
+            >
+              <input
+                {...register("search", {
+                  required: "Please enter a search term",
+                  minLength: {
+                    value: 3,
+                    message: "Search term must be at least 3 characters",
+                  },
+                })}
+                type="text"
+                placeholder="Search movies..."
+                className="border p-2 rounded w-full outline-none"
+              />
+              {errors.search && (
+                <p className="text-red-500 mt-1">{errors.search.message}</p>
+              )}
+            </form>
+            {suggestions.length > 0 && (
+              <div className="absolute border rounded mt-2 max-h-60 overflow-y-auto z-10 bg-background">
+                {suggestions.map((movie) => (
+                  <div
+                    key={movie.id}
+                    className="p-2 cursor-pointer hover:bg-secondary"
+                    onClick={() => handleSuggestionClick(movie.title)}
+                  >
+                    {movie.title}
+                  </div>
+                ))}
+              </div>
             )}
-          </form>
-          {suggestions.length > 0 && (
-            <div className="absolute border rounded mt-2 max-h-60 overflow-y-auto z-10 bg-background">
-              {suggestions.map((movie) => (
-                <div
-                  key={movie.id}
-                  className="p-2 cursor-pointer hover:bg-secondary"
-                  onClick={() => handleSuggestionClick(movie.title)}
-                >
-                  {movie.title}
-                </div>
-              ))}
-            </div>
-          )}
+          </div>
+          <div>
+            <AdvancedFilterDialog />
+          </div>
         </div>
       </div>
       {error && <h2>Failed to load data</h2>}
