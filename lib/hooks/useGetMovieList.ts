@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Movie } from "@/lib/interfaces";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 function getLocalStorageList(key: string): Movie[] {
   if (typeof window === "undefined") return [];

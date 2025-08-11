@@ -84,7 +84,8 @@ export default function AdvancedFilterDialog() {
   const onSubmit = (data: FilterFormData) => {
     const query = new URLSearchParams();
 
-    if (!data.genre || !data.year || !data.rating?.[0] || !data.language) return;
+    if (!data.genre || !data.year || !data.rating?.[0] || !data.language)
+      return;
 
     query.append("with_genres", data.genre);
     query.append("primary_release_year", data.year);
@@ -106,17 +107,20 @@ export default function AdvancedFilterDialog() {
           <DialogHeader>
             <DialogTitle>Advanced Filtering</DialogTitle>
             <DialogDescription>
-              All fields are required. Discover movies based on your exact taste.
+              All fields are required. Discover movies based on your exact
+              taste.
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Genre */}
-            <div>
+            <div className="space-y-1">
               <Label>Genre</Label>
               <Select
                 defaultValue={genreOptions[0].id}
-                onValueChange={(value) => setValue("genre", value, { shouldValidate: true })}
+                onValueChange={(value) =>
+                  setValue("genre", value, { shouldValidate: true })
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select genre" />
@@ -135,7 +139,7 @@ export default function AdvancedFilterDialog() {
             </div>
 
             {/* Year */}
-            <div>
+            <div className="space-y-1">
               <Label>Release Year</Label>
               <Input
                 type="number"
@@ -153,7 +157,7 @@ export default function AdvancedFilterDialog() {
             </div>
 
             {/* Rating */}
-            <div>
+            <div className="space-y-1">
               <Label>Minimum Rating</Label>
               <Slider
                 min={0}
@@ -174,11 +178,13 @@ export default function AdvancedFilterDialog() {
             </div>
 
             {/* Language */}
-            <div>
+            <div className="space-y-1">
               <Label>Language</Label>
               <Select
                 defaultValue={languageOptions[0].id}
-                onValueChange={(value) => setValue("language", value, { shouldValidate: true })}
+                onValueChange={(value) =>
+                  setValue("language", value, { shouldValidate: true })
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select language" />
@@ -197,7 +203,7 @@ export default function AdvancedFilterDialog() {
             </div>
 
             {/* Footer */}
-            <DialogFooter className="pt-4">
+            <DialogFooter className="pt-4 flex gap-2 sm:gap-0">
               <DialogClose asChild>
                 <Button variant="outline" type="button">
                   Cancel
