@@ -23,12 +23,12 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
 interface FilterFormData {
   genre: string;
   year: string;
-  rating: number[];
+  rating: number[]; // react-hook-form stores slider as array
   language: string;
 }
 
@@ -64,12 +64,15 @@ const languageOptions = [
 
 export default function AdvancedFilterDialog() {
   const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [sliderValue, setSliderValue] = useState<number[]>([7]);
+  const [isPending, startTransition] = useTransition();
 
   const {
     register,
     handleSubmit,
     setValue,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<FilterFormData>({
     defaultValues: {
       genre: genreOptions[0].id,
@@ -79,14 +82,10 @@ export default function AdvancedFilterDialog() {
     },
   });
 
-  const [sliderValue, setSliderValue] = useState<number[]>([7]);
-
   const onSubmit = (data: FilterFormData) => {
+    if (!data.genre || !data.year || !data.rating?.[0] || !data.language) return;
+
     const query = new URLSearchParams();
-
-    if (!data.genre || !data.year || !data.rating?.[0] || !data.language)
-      return;
-
     query.append("with_genres", data.genre);
     query.append("primary_release_year", data.year);
     query.append("vote_average.gte", data.rating[0].toString());
@@ -94,21 +93,27 @@ export default function AdvancedFilterDialog() {
     query.append("sort_by", "popularity.desc");
     query.append("include_adult", "false");
 
-    router.push(`/discover?${query.toString()}`);
+    // start a transition so we can show loading on the button
+    startTransition(() => {
+      setOpen(false); // close dialog as navigation starts
+      router.push(`/discover?${query.toString()}`);
+    });
   };
+
+  const applying = isSubmitting || isPending;
 
   return (
     <div>
-      <Dialog>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button size="lg">Advanced Filter</Button>
         </DialogTrigger>
+
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Advanced Filtering</DialogTitle>
             <DialogDescription>
-              All fields are required. Discover movies based on your exact
-              taste.
+              All fields are required. Discover movies based on your exact taste.
             </DialogDescription>
           </DialogHeader>
 
@@ -119,7 +124,7 @@ export default function AdvancedFilterDialog() {
               <Select
                 defaultValue={genreOptions[0].id}
                 onValueChange={(value) =>
-                  setValue("genre", value, { shouldValidate: true })
+                  setValue("genre", value, { shouldValidate: true, shouldDirty: true })
                 }
               >
                 <SelectTrigger>
@@ -133,9 +138,9 @@ export default function AdvancedFilterDialog() {
                   ))}
                 </SelectContent>
               </Select>
-              {errors.genre && (
-                <p className="text-sm text-red-500">Genre is required</p>
-              )}
+              {/* register hidden so RHF tracks/validates the field */}
+              <input type="hidden" {...register("genre", { required: true })} />
+              {errors.genre && <p className="text-sm text-red-500">Genre is required</p>}
             </div>
 
             {/* Year */}
@@ -143,12 +148,11 @@ export default function AdvancedFilterDialog() {
               <Label>Release Year</Label>
               <Input
                 type="number"
+                inputMode="numeric"
                 {...register("year", {
                   required: "Year is required",
-                  pattern: {
-                    value: /^\d{4}$/,
-                    message: "Enter a valid 4-digit year",
-                  },
+                  validate: (v) =>
+                    /^\d{4}$/.test(String(v)) || "Enter a valid 4-digit year",
                 })}
               />
               {errors.year && (
@@ -166,14 +170,26 @@ export default function AdvancedFilterDialog() {
                 value={sliderValue}
                 onValueChange={(value) => {
                   setSliderValue(value);
-                  setValue("rating", value, { shouldValidate: true });
+                  setValue("rating", value, { shouldValidate: true, shouldDirty: true });
                 }}
+              />
+              {/* register hidden so RHF knows about "rating" */}
+              <input
+                type="hidden"
+                {...register("rating", {
+                  validate: (v) =>
+                    Array.isArray(v) && v.length > 0 ? true : "Rating is required",
+                })}
               />
               <p className="text-sm text-muted-foreground mt-1">
                 Selected: {sliderValue[0]}
               </p>
               {errors.rating && (
-                <p className="text-sm text-red-500">Rating is required</p>
+                <p className="text-sm text-red-500">
+                  {typeof errors.rating.message === "string"
+                    ? errors.rating.message
+                    : "Rating is required"}
+                </p>
               )}
             </div>
 
@@ -183,7 +199,7 @@ export default function AdvancedFilterDialog() {
               <Select
                 defaultValue={languageOptions[0].id}
                 onValueChange={(value) =>
-                  setValue("language", value, { shouldValidate: true })
+                  setValue("language", value, { shouldValidate: true, shouldDirty: true })
                 }
               >
                 <SelectTrigger>
@@ -197,6 +213,7 @@ export default function AdvancedFilterDialog() {
                   ))}
                 </SelectContent>
               </Select>
+              <input type="hidden" {...register("language", { required: true })} />
               {errors.language && (
                 <p className="text-sm text-red-500">Language is required</p>
               )}
@@ -205,11 +222,17 @@ export default function AdvancedFilterDialog() {
             {/* Footer */}
             <DialogFooter className="pt-4 flex gap-2 sm:gap-0">
               <DialogClose asChild>
-                <Button variant="outline" type="button">
+                <Button variant="outline" type="button" disabled={applying}>
                   Cancel
                 </Button>
               </DialogClose>
-              <Button type="submit">Apply Filters</Button>
+
+              <Button type="submit" disabled={applying} className="flex items-center gap-2">
+                {applying && (
+                  <span className="w-4 h-4 border-2 border-t-transparent border-current rounded-full animate-spin" />
+                )}
+                {applying ? "Applying…" : "Apply Filters"}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
