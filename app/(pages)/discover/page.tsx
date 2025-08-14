@@ -1,12 +1,12 @@
 import { fetchDiscoverMovies } from "@/lib/tmdb";
 import Card from "@/components/Movie/Card/Card";
 import { Movie } from "@/lib/interfaces";
-import Link from "next/link";
+import PaginationControls from "@/components/Paginations/PaginationControls";
 
 interface DiscoverPageProps {
   searchParams: { [key: string]: string | string[] | undefined };
 }
-export const dynamic = "force-dynamic"; // allows dynamic search params
+export const dynamic = "force-dynamic";
 
 const Discover = async ({ searchParams }: DiscoverPageProps) => {
   const page = Number(searchParams.page) || 1;
@@ -25,9 +25,7 @@ const Discover = async ({ searchParams }: DiscoverPageProps) => {
 
   keys.forEach((key) => {
     const value = searchParams[key];
-    if (typeof value === "string") {
-      apiFilters[key] = value;
-    }
+    if (typeof value === "string") apiFilters[key] = value;
   });
 
   const data = await fetchDiscoverMovies(apiFilters, page);
@@ -46,31 +44,11 @@ const Discover = async ({ searchParams }: DiscoverPageProps) => {
         </div>
       )}
 
-      {/* Pagination */}
-      <div className="flex justify-center gap-4 mt-10">
-        {page > 1 && (
-          <Link
-            href={`/discover?${new URLSearchParams({
-              ...apiFilters,
-              page: String(page - 1),
-            })}`}
-            className="px-4 py-1.5 transition border-2 rounded-md border-primary hover:bg-primary hover:text-secondary"
-          >
-            Previous
-          </Link>
-        )}
-        {page < data.total_pages && (
-          <Link
-            href={`/discover?${new URLSearchParams({
-              ...apiFilters,
-              page: String(page + 1),
-            })}`}
-            className="px-4 py-1.5 transition border-2 rounded-md border-primary hover:bg-primary hover:text-secondary"
-          >
-            Next
-          </Link>
-        )}
-      </div>
+      <PaginationControls
+        page={page}
+        totalPages={data.total_pages}
+        apiFilters={apiFilters}
+      />
     </div>
   );
 };
