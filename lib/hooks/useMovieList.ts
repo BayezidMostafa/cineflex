@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Movie } from "@/lib/interfaces";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 const WATCHLIST_KEY = "watchList";
 const FAVORITE_KEY = "favoriteList";

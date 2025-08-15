@@ -106,3 +106,16 @@ body {
 .center-modal .particles-bg-canvas-self {
   border-radius: 7px !important;
 }
+
+.casts-slider .swiper-scrollbar {
+  height: 6px;
+  background: rgba(0, 0, 0, 0.1);
+}
+/* Scrollbar drag color in light theme */
+html:not(.dark) .casts-slider .swiper-scrollbar-drag {
+  background: #000;
+}
+/* Scrollbar drag color in dark theme */
+html.dark .casts-slider .swiper-scrollbar-drag {
+  background: #fff;
+}

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, FreeMode } from "swiper/modules";
+import { Autoplay, FreeMode, Scrollbar } from "swiper/modules";
 import Image from "next/image";
 import "swiper/css";
 import "swiper/css/scrollbar";
@@ -28,49 +28,55 @@ interface CastsSliderProps {
 
 const CastsSlider: React.FC<CastsSliderProps> = ({ cast }) => {
   return (
-    <Swiper
-      modules={[ Autoplay, FreeMode]}
-      loop={true}
-      speed={1000} // time (ms) it takes to move one slide width
-      autoplay={{
-        delay: 0, // no pause between transitions
-        disableOnInteraction: false,
-      }}
-      freeMode={{
-        enabled: true, // let slides flow continuously
-        sticky: false, // don’t snap to slides
-      }}
-      slidesPerView={5}
-      spaceBetween={10}
-      breakpoints={{
-        320: { slidesPerView: 1 },
-        480: { slidesPerView: 2 },
-        768: { slidesPerView: 3 },
-        1024: { slidesPerView: 4 },
-        1280: { slidesPerView: 5 },
-      }}
-      className="relative max-w-[600px] casts-slider"
-    >
-      {cast.map((member) => (
-        <SwiperSlide key={member.cast_id}>
-          <div className="text-center">
-            <Image
-              src={
-                member.profile_path
-                  ? `https://image.tmdb.org/t/p/w200${member.profile_path}`
-                  : "/placeholder.png"
-              }
-              alt={member.name}
-              width={100}
-              height={150}
-              className="rounded-lg mx-auto w-full"
-            />
-            <p className="mt-2 font-medium">{member.name}</p>
-            <p className="text-sm text-gray-500">{member.character}</p>
-          </div>
-        </SwiperSlide>
-      ))}
-    </Swiper>
+    <div className="relative max-w-[600px]">
+      <Swiper
+        modules={[Autoplay, FreeMode, Scrollbar]}
+        loop={false} // scrollbar works best without looping
+        speed={1000}
+        autoplay={{
+          delay: 0,
+          disableOnInteraction: false,
+        }}
+        freeMode={{
+          enabled: true,
+          sticky: false,
+        }}
+        scrollbar={{
+          hide: false,
+          draggable: true,
+        }}
+        slidesPerView={5}
+        spaceBetween={10}
+        breakpoints={{
+          320: { slidesPerView: 1 },
+          480: { slidesPerView: 2 },
+          768: { slidesPerView: 3 },
+          1024: { slidesPerView: 4 },
+          1280: { slidesPerView: 5 },
+        }}
+        className="casts-slider"
+      >
+        {cast.map((member) => (
+          <SwiperSlide key={member.cast_id} className="pb-5">
+            <div className="text-center">
+              <Image
+                src={
+                  member.profile_path
+                    ? `https://image.tmdb.org/t/p/w200${member.profile_path}`
+                    : "/placeholder.png"
+                }
+                alt={member.name}
+                width={100}
+                height={150}
+                className="rounded-lg mx-auto w-full"
+              />
+              <p className="mt-2 font-medium">{member.name}</p>
+              <p className="text-sm text-gray-500">{member.character}</p>
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    </div>
   );
 };
 

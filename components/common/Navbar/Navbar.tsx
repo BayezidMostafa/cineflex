@@ -2,29 +2,33 @@ import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { NavData } from "@/lib/data";
 import Link from "next/link";
 import React, { useState } from "react";
-import { X, Menu, Loader } from "lucide-react";
+import {
+  X,
+  Menu,
+  // Loader
+} from "lucide-react";
 import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@clerk/nextjs";
-import { useModalStore } from "@/store/useModalStore";
+// import { Button } from "@/components/ui/button";
+// import { useAuth } from "@clerk/nextjs";
+// import { useModalStore } from "@/store/useModalStore";
 
 const Navbar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const pathname = usePathname();
-  const { isLoaded, userId, signOut } = useAuth();
-  const [loading, setLoading] = useState(false);
+  // const { isLoaded, userId, signOut } = useAuth();
+  // const [loading, setLoading] = useState(false);
 
-  const { openModal } = useModalStore();
+  // const { openModal } = useModalStore();
 
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev);
   };
 
-  const handleLogout = async () => {
-    setLoading(true);
-    await signOut();
-    setLoading(false);
-  };
+  // const handleLogout = async () => {
+  //   setLoading(true);
+  //   await signOut();
+  //   setLoading(false);
+  // };
 
   return (
     <nav className="flex items-center justify-between fixed left-0 right-0 max-w-7xl mx-auto p-5 bg-background rounded-b-lg shadow border-2 border-primary-foreground z-50">
@@ -49,7 +53,7 @@ const Navbar = () => {
         ))}
       </div>
       <div className="flex items-center gap-4">
-        {isLoaded ? (
+        {/* {isLoaded ? (
           <div>
             {userId ? (
               <Button disabled={loading} onClick={handleLogout}>
@@ -65,7 +69,7 @@ const Navbar = () => {
           <>
             <Loader className="animate-spin" />
           </>
-        )}
+        )} */}
         <ThemeToggle />
         <button onClick={toggleSidebar} className="md:hidden">
           <Menu className="w-6 h-6" />
