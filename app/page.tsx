@@ -12,6 +12,7 @@ import Skeleton from "@/components/Movie/Card/Skeleton";
 import { useUser } from "@clerk/clerk-react";
 import AdvancedFilterDialog from "@/components/filter/filter";
 import Image from "next/image";
+import Link from "next/link";
 
 interface SearchFormData {
   search: string;
@@ -61,7 +62,7 @@ const Home = () => {
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
-    resetMovies(); // Clear the movie store on page load
+    resetMovies(); 
   }, [resetMovies]);
 
   useEffect(() => {
@@ -115,8 +116,6 @@ const Home = () => {
     console.log("User information:", user);
   }, [user]);
 
-  console.log(suggestions);
-
   return (
     <div className="mt-5 mb-8">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 relative">
@@ -137,7 +136,7 @@ const Home = () => {
                 })}
                 type="text"
                 placeholder="Search movies..."
-                className="border p-2 rounded w-full outline-none"
+                className="border p-2 rounded w-full outline-none bg-transparent"
               />
               {errors.search && (
                 <p className="text-red-500 mt-1">{errors?.search?.message}</p>
@@ -159,12 +158,12 @@ const Home = () => {
                     : "/placeholder.png";
 
                   return (
-                    <div
+                    <Link
+                      href={`/movie/${movie.id}`}
                       key={movie.id}
                       role="option"
                       aria-selected="false"
                       className="flex items-center gap-3 p-2 cursor-pointer hover:bg-secondary"
-                      onClick={() => router.push(`/movie/${movie.id}`)}
                       onMouseDown={(e) => e.preventDefault()}
                     >
                       <div className="shrink-0">
@@ -185,7 +184,7 @@ const Home = () => {
                           {year}
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   );
                 })}
               </div>
