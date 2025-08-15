@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
-import { useTheme } from "next-themes";
 
 export default function TopProgress({
   active,
@@ -13,10 +12,6 @@ export default function TopProgress({
   height?: number;
   zIndex?: number;
 }) {
-  const { theme, systemTheme } = useTheme();
-  const currentTheme = theme === "system" ? systemTheme : theme;
-  const color = currentTheme === "dark" ? "#fff" : "#000";
-
   const [visible, setVisible] = useState(false);
   const [progress, setProgress] = useState(0); // 0 → 100
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -65,11 +60,12 @@ export default function TopProgress({
     >
       <div className="w-full bg-transparent relative" style={{ height }}>
         <div
-          className="h-full"
+          className="h-full text-black dark:text-white" // <- picks the color instantly on first paint
           style={{
             width: `${progress}%`,
-            background: color,
-            boxShadow: `0 0 8px ${color}66`,
+            background: "currentColor",
+            // box-shadow can't add alpha to currentColor; usually fine without it:
+            boxShadow: "0 0 8px currentColor",
             transition: "width 120ms ease",
           }}
         />
