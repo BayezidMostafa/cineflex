@@ -46,7 +46,10 @@ const Card: React.FC<CardProps> = ({
         whileHover="hover"
         animate="rest"
       >
-        <Link href={`/movie/${data?.id}`} className="block overflow-hidden group">
+        <Link
+          href={`/movie/${data?.id}`}
+          className="block overflow-hidden group"
+        >
           <Image
             src={posterUrl}
             height={278}
@@ -57,7 +60,7 @@ const Card: React.FC<CardProps> = ({
             blurDataURL={staticBlurDataURL}
             onLoadingComplete={() => setLoaded(true)}
             className={clsx(
-              "w-full min-h-[340px] object-cover transition-all duration-300 rounded-md group-hover:scale-110",
+              "w-full min-h-[340px] object-cover transition-all duration-500 rounded-md group-hover:scale-110 group-active:scale-100",
               loaded ? "opacity-100" : "opacity-0"
             )}
           />

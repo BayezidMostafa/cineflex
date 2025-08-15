@@ -91,28 +91,45 @@ export default async function MovieDetailsPage({
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-4">{movie.title}</h1>
+      <h1 className="text-3xl font-bold mb-4 block lg:hidden">{movie.title}</h1>
       <div className="flex flex-col lg:flex-row gap-8">
-        <div className="w-full relative">
-          <Image
-            src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-            width={500}
-            height={750}
-            alt={movie.title}
-            loading="lazy"
-            className="rounded-lg object-contain w-full"
-          />
+        {/* Poster block — fixed 2:3 ratio, crisp, wider */}
+        <div className="w-full lg:max-w-[600px] relative">
+          <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden">
+            <Image
+              src={`https://image.tmdb.org/t/p/w780${movie.poster_path}`} // high-res
+              alt={movie.title}
+              fill
+              priority={true}
+              sizes="(max-width: 1024px) 100vw, 600px" // wider target on large screens
+              className="object-cover"
+            />
+          </div>
+
+          {/* Actions keep original absolute position */}
           <div className="absolute top-4 right-5 flex flex-col items-end gap-2">
             <MovieDetailsActions movie={movie} />
           </div>
         </div>
 
         <div className="w-full">
-          <h2 className="text-2xl font-semibold">Overview</h2>
+          <p className="text-2xl sm:text-3xl font-bold mb-3 hidden lg:block">
+            {movie?.original_title}
+          </p>
+          <h2 className="text-xl sm:text-2xl font-semibold">Overview</h2>
           <p className="mt-2">{movie.overview}</p>
 
           <h3 className="text-xl font-semibold mt-3">Genres</h3>
           <p>{movie.genres.map((g) => g.name).join(", ")}</p>
+
+          <h4 className="text-xl font-semibold mt-3">Language</h4>
+          <p>
+            {movie?.original_language
+              ? new Intl.DisplayNames(["en"], { type: "language" }).of(
+                  movie.original_language
+                )
+              : "Unknown"}
+          </p>
 
           <p className="mt-4">
             <span className="font-semibold">Release Date:</span>{" "}
@@ -142,7 +159,7 @@ export default async function MovieDetailsPage({
 
           <TrailerModal trailerKey={trailer?.key} />
 
-          <h3 className="text-xl font-semibold mt-4 mb-1">Cast</h3>
+          <h5 className="text-xl font-semibold mt-4 mb-1">Cast</h5>
           <CastsSlider cast={cast} />
         </div>
       </div>
