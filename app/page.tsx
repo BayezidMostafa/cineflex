@@ -11,6 +11,7 @@ import Card from "@/components/Movie/Card/Card";
 import Skeleton from "@/components/Movie/Card/Skeleton";
 import { useUser } from "@clerk/clerk-react";
 import AdvancedFilterDialog from "@/components/filter/filter";
+import Image from "next/image";
 
 interface SearchFormData {
   search: string;
@@ -108,15 +109,13 @@ const Home = () => {
     router.push(`/search?query=${encodeURIComponent(data.search)}`);
   };
 
-  const handleSuggestionClick = (title: string) => {
-    router.push(`/search?query=${encodeURIComponent(title)}`);
-  };
-
   const { user } = useUser();
 
   useEffect(() => {
     console.log("User information:", user);
   }, [user]);
+
+  console.log(suggestions);
 
   return (
     <div className="mt-5 mb-8">
@@ -141,20 +140,54 @@ const Home = () => {
                 className="border p-2 rounded w-full outline-none"
               />
               {errors.search && (
-                <p className="text-red-500 mt-1">{errors.search.message}</p>
+                <p className="text-red-500 mt-1">{errors?.search?.message}</p>
               )}
             </form>
             {suggestions.length > 0 && (
-              <div className="absolute border rounded mt-2 max-h-60 overflow-y-auto z-10 bg-background">
-                {suggestions.map((movie) => (
-                  <div
-                    key={movie.id}
-                    className="p-2 cursor-pointer hover:bg-secondary"
-                    onClick={() => handleSuggestionClick(movie.title)}
-                  >
-                    {movie.title}
-                  </div>
-                ))}
+              <div
+                className="absolute mt-2 w-full max-h-60 overflow-y-auto z-10 border rounded bg-background shadow-md"
+                role="listbox"
+              >
+                {suggestions.map((movie) => {
+                  const year =
+                    movie.release_date && movie.release_date.length >= 4
+                      ? movie.release_date.slice(0, 4)
+                      : "—";
+
+                  const posterSrc = movie.poster_path
+                    ? `https://image.tmdb.org/t/p/w92${movie.poster_path}`
+                    : "/placeholder.png";
+
+                  return (
+                    <div
+                      key={movie.id}
+                      role="option"
+                      aria-selected="false"
+                      className="flex items-center gap-3 p-2 cursor-pointer hover:bg-secondary"
+                      onClick={() => router.push(`/movie/${movie.id}`)}
+                      onMouseDown={(e) => e.preventDefault()}
+                    >
+                      <div className="shrink-0">
+                        <Image
+                          src={posterSrc}
+                          alt={`${movie.title} poster`}
+                          width={40}
+                          height={56}
+                          className="rounded-sm object-cover bg-muted"
+                        />
+                      </div>
+
+                      <div className="min-w-0">
+                        <div className="truncate font-medium leading-5">
+                          {movie.title}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {year}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>

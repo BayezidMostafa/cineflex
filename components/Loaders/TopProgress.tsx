@@ -60,11 +60,10 @@ export default function TopProgress({
     >
       <div className="w-full bg-transparent relative" style={{ height }}>
         <div
-          className="h-full text-black dark:text-white" // <- picks the color instantly on first paint
+          className="h-full text-black dark:text-white"
           style={{
             width: `${progress}%`,
             background: "currentColor",
-            // box-shadow can't add alpha to currentColor; usually fine without it:
             boxShadow: "0 0 8px currentColor",
             transition: "width 120ms ease",
           }}
